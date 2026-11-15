@@ -1,0 +1,354 @@
+/* ThermiGraph AI — styles.css (JavaScript version)
+   Port of the Streamlit dashboard's design system (v6.3.13), rebuilt for a
+   plain HTML page so JavaScript and CSS animation have full freedom.
+   Two themes, switched by html[data-theme="light" | "dark"].
+   Fonts: Plus Jakarta Sans (UI), JetBrains Mono (numbers), Noto Sans Arabic. */
+
+/* ---------- Theme variables ---------- */
+:root {
+    --font-ui: 'Plus Jakarta Sans', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --accent: #0284c7;
+    --accent-2: #1d4ed8;
+    --accent-soft: #38bdf8;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --orange: #f97316;
+    --red: #f43f5e;
+}
+html[data-theme="light"] {
+    --bg: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    --surface: rgba(255, 255, 255, 0.88);
+    --card-bg: #ffffff;
+    --border: rgba(15, 23, 42, 0.10);
+    --border-hover: rgba(14, 165, 233, 0.45);
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #334155;
+    --shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.08);
+    --hero-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.85) 100%);
+    --hero-title: linear-gradient(95deg, #0f172a 0%, #0369a1 100%);
+    --chip-bg: #f1f5f9;
+    --pill-bg: rgba(2, 132, 199, 0.10);
+    --pill-text: #0284c7;
+    --pill-border: rgba(2, 132, 199, 0.25);
+    --kicker: #0284c7;
+    --track: rgba(15, 23, 42, 0.12);
+    --topbar-bg: rgba(248, 250, 252, 0.92);
+}
+html[data-theme="dark"] {
+    --bg: linear-gradient(180deg, #060911 0%, #0b1120 100%);
+    --surface: rgba(15, 23, 42, 0.68);
+    --card-bg: rgba(15, 23, 42, 0.75);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(56, 189, 248, 0.45);
+    --text: #f8fafc;
+    --text-2: #94a3b8;
+    --text-3: #e2e8f0;
+    --shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.45);
+    --hero-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.50) 100%);
+    --hero-title: linear-gradient(95deg, #ffffff 0%, #bae6fd 55%, #38bdf8 100%);
+    --chip-bg: rgba(15, 23, 42, 0.75);
+    --pill-bg: rgba(56, 189, 248, 0.13);
+    --pill-text: #7dd3fc;
+    --pill-border: rgba(56, 189, 248, 0.30);
+    --kicker: #38bdf8;
+    --track: rgba(255, 255, 255, 0.12);
+    --topbar-bg: rgba(8, 13, 25, 0.88);
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--text);
+    background: var(--bg);
+    background-attachment: fixed;
+    line-height: 1.5;
+}
+h1, h2, h3 { color: var(--text); letter-spacing: -0.02em; font-weight: 700; }
+h2 { font-size: 1.45rem; margin: 0.2rem 0 1rem 0; }
+a { color: var(--accent); }
+
+/* ---------- Top bar ---------- */
+.tg-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(22px);
+    border-bottom: 1px solid var(--border);
+}
+.tg-topbar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.tg-brand { font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em; }
+.tg-brand span { background: var(--hero-title); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.tg-topbar-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ---------- Page ---------- */
+.tg-page { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
+.tg-section { margin-bottom: 0.5rem; }
+.tg-divider { border: none; border-top: 1px solid var(--border); margin: 2.2rem 0; }
+.tg-body { color: var(--text-3); margin: 0 0 1rem 0; }
+.tg-caption { font-size: 0.82rem; color: var(--text-2); margin: 0.5rem 0; }
+
+/* ---------- Scroll-in animations (sections fade up as you scroll to them) ---------- */
+@keyframes tgPulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+}
+.tg-anim {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    transition-delay: calc(var(--anim-order, 0) * 60ms);
+}
+.tg-anim.tg-visible { opacity: 1; transform: translateY(0); }
+.tg-hero { --anim-order: 0; }
+.tg-section { --anim-order: 1; }
+
+/* ---------- Pulsing map ring (hotter zones pulse faster) ---------- */
+@keyframes tgRingPulse {
+    0% { opacity: 0.55; }
+    50% { opacity: 0.08; }
+    100% { opacity: 0.55; }
+}
+.tg-pulse-ring { animation: tgRingPulse 2.4s ease-in-out infinite; }
+
+/* ---------- Guided demo tour ---------- */
+.tg-tour-bar {
+    position: fixed; right: 1.2rem; top: 4.5rem; bottom: auto; left: auto; transform: none;
+    z-index: 1000; width: auto; max-width: calc(100vw - 2rem);
+    background: var(--card-bg); border: 1px solid var(--border-hover);
+    border-radius: 999px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    padding: 0.45rem 0.7rem; backdrop-filter: blur(16px);
+}
+.tg-tour-bar[hidden] { display: none; }
+.tg-tour-title { display: none; }
+.tg-tour-text { display: none; }
+/* v13: guided tour removed from the UI (user decision 2026-11-14).
+   The tour bar took up too much screen and hid the figures in the
+   video. The tour JS stays in app.js so it can be restored later,
+   but the button and the bar are hidden. The demo is driven by
+   scrolling to each section and using its own controls. */
+#btnTour { display: none; }
+#tourBar { display: none !important; }
+.tg-tour-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.tg-tour-step { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-2); margin-left: auto; }
+.tg-tour-highlight { outline: 3px solid var(--accent); outline-offset: 6px; border-radius: 12px; }
+
+/* ---------- Day scrubber + before/after slider ---------- */
+.tg-scrub-readout {
+    font-family: var(--font-mono); font-size: 0.92rem; font-weight: 600;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 0.6rem 0.9rem; margin: 0.8rem 0;
+}
+.tg-table tr.tg-row-active td { background: rgba(2, 132, 199, 0.14); font-weight: 600; }
+.tg-ba-labels { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-2); margin-top: 0.2rem; }
+
+/* ---------- Hero ---------- */
+.tg-hero {
+    padding: 1.8rem 2.2rem;
+    border-radius: 22px;
+    background: var(--hero-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
+    margin-bottom: 1.5rem;
+}
+.tg-badge-row { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; margin-bottom: 0.75rem; }
+.tg-pill {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.28rem 0.78rem; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    background: var(--pill-bg); color: var(--pill-text);
+    border: 1px solid var(--pill-border);
+}
+.tg-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: tgPulse 2s infinite; }
+.tg-hero-title {
+    font-size: 2.35rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15;
+    margin: 0 0 0.4rem 0;
+    background: var(--hero-title);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.tg-hero-tagline { font-size: 1.05rem; font-weight: 600; color: var(--text-3); margin: 0 0 0.35rem 0; }
+.tg-hero-sub { font-size: 0.88rem; color: var(--text-2); margin: 0; line-height: 1.5; }
+
+/* ---------- Kickers, cards, metrics ---------- */
+.tg-kicker {
+    font-size: 0.73rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.09em; color: var(--kicker); margin-bottom: 0.15rem;
+}
+.tg-glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.tg-glass-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.tg-metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.tg-metric-grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.tg-metric-grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.tg-metric {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.15rem 1.3rem;
+    box-shadow: var(--shadow);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.tg-metric:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.tg-metric-label { font-size: 0.77rem; font-weight: 600; text-transform: uppercase; color: var(--text-2); }
+.tg-metric-value { font-family: var(--font-mono); font-size: 1.85rem; font-weight: 700; color: var(--text); margin: 0.2rem 0; }
+.tg-metric-delta { font-size: 0.82rem; color: var(--text-2); }
+
+/* ---------- Buttons, inputs, sliders ---------- */
+.tg-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%);
+    color: #ffffff; font-weight: 600; font-family: var(--font-ui);
+    border: none; border-radius: 12px; padding: 0.6rem 1.3rem;
+    cursor: pointer; font-size: 0.92rem;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.tg-btn:hover { filter: brightness(1.12); box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35); transform: translateY(-1px); }
+.tg-btn:active { transform: translateY(0); }
+.tg-btn-ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border);
+}
+.tg-btn-ghost:hover { box-shadow: none; border-color: var(--border-hover); }
+.tg-btn-large { padding: 0.75rem 1.6rem; font-size: 1rem; }
+.tg-btn-row { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.tg-field-label { display: block; font-weight: 600; font-size: 0.9rem; color: var(--text); margin: 1rem 0 0.4rem 0; }
+.tg-select, .tg-input, .tg-textarea {
+    width: 100%; font-family: var(--font-ui); font-size: 0.95rem;
+    color: var(--text); background: var(--card-bg);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 0.65rem 0.9rem; outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.tg-select:focus, .tg-input:focus, .tg-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18); }
+.tg-textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
+.tg-gps-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.tg-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.tg-slider-row { display: flex; align-items: center; gap: 1rem; margin: 0.4rem 0 1rem 0; }
+.tg-slider { flex: 1; accent-color: var(--accent); height: 6px; cursor: pointer; }
+.tg-slider-value { font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; min-width: 64px; text-align: right; }
+.tg-split { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; align-items: start; }
+@media (max-width: 800px) { .tg-split { grid-template-columns: 1fr; } .tg-gps-row { grid-template-columns: 1fr; } }
+
+/* ---------- NIOSH chips ---------- */
+.tg-niosh-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 0.6rem; margin-top: 0.6rem; }
+.tg-niosh-chip {
+    padding: 0.62rem 0.85rem; border-radius: 12px;
+    font-family: var(--font-mono); font-size: 0.82rem;
+    border: 1px solid var(--border); background: var(--chip-bg);
+}
+.tg-chip-ok { border-left: 3px solid var(--green); color: var(--green); }
+.tg-chip-over { border-left: 3px solid var(--red); color: var(--red); background: rgba(244, 63, 94, 0.10); }
+html[data-theme="light"] .tg-chip-ok { color: #047857; }
+html[data-theme="light"] .tg-chip-over { color: #be123c; background: #ffe4e6; }
+
+/* ---------- Map ---------- */
+.tg-map-wrap { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); margin: 1rem 0; box-shadow: var(--shadow); }
+#mapContainer { height: 460px; width: 100%; background: var(--card-bg); }
+#compareMapContainer { height: 420px; width: 100%; background: var(--card-bg); margin-bottom: 1rem; }
+.tg-map-fallback { padding: 1.2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; }
+.tg-map-fallback .tg-zone-card { border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; background: var(--card-bg); }
+.tg-map-fallback .tg-zone-name { font-weight: 700; }
+.tg-map-fallback .tg-zone-wbgt { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 700; }
+
+/* ---------- Leaflet map labels ---------- */
+/* Leaflet draws its own tooltip boxes; make them match the dashboard. */
+.tg-map-label {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 3px 8px;
+}
+.tg-map-label::before { display: none; } /* hide Leaflet's little arrow */
+
+/* ---------- Tables ---------- */
+.tg-table-wrap { overflow-x: auto; margin: 0.8rem 0 1rem 0; border: 1px solid var(--border); border-radius: 14px; background: var(--card-bg); }
+table.tg-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.tg-table th, table.tg-table td { padding: 0.6rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.tg-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); background: var(--surface); }
+table.tg-table tr:last-child td { border-bottom: none; }
+table.tg-table tr { transition: background 0.15s ease; }
+table.tg-table tbody tr:hover { background: var(--surface); }
+.tg-badge { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+.tg-badge-red { background: rgba(244, 63, 94, 0.14); color: var(--red); }
+.tg-badge-amber { background: rgba(245, 158, 11, 0.16); color: var(--amber); }
+.tg-badge-green { background: rgba(16, 185, 129, 0.14); color: var(--green); }
+.tg-badge-blue { background: rgba(2, 132, 199, 0.12); color: var(--accent); }
+
+/* ---------- Chart ---------- */
+.tg-chart { min-height: 340px; border: 1px solid var(--border); border-radius: 16px; background: var(--card-bg); padding: 0.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+.tg-chart-note { padding: 2rem; text-align: center; color: var(--text-2); }
+
+/* ---------- Alerts ---------- */
+.tg-alert { border-radius: 12px; padding: 0.9rem 1.1rem; margin: 0.8rem 0; font-weight: 600; border: 1px solid; }
+.tg-alert-error { background: rgba(244, 63, 94, 0.10); border-color: rgba(244, 63, 94, 0.4); color: var(--red); }
+.tg-alert-warn { background: rgba(245, 158, 11, 0.10); border-color: rgba(245, 158, 11, 0.4); color: #b45309; }
+html[data-theme="dark"] .tg-alert-warn { color: #fbbf24; }
+.tg-alert-info { background: rgba(2, 132, 199, 0.10); border-color: rgba(2, 132, 199, 0.4); color: var(--accent); }
+.tg-status { border-radius: 12px; padding: 0.9rem 1.1rem; margin-bottom: 1rem; font-weight: 600; background: rgba(245, 158, 11, 0.10); border: 1px solid rgba(245, 158, 11, 0.4); color: #b45309; }
+html[data-theme="dark"] .tg-status { color: #fbbf24; }
+
+/* ---------- Strain gauge ---------- */
+.tg-gauge { margin: 0.8rem 0 0.4rem 0; }
+.tg-gauge-top { display: flex; justify-content: space-between; align-items: baseline; }
+.tg-gauge-label { font-size: 0.85rem; font-weight: 600; color: var(--text-2); text-transform: uppercase; }
+.tg-gauge-number { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 700; transition: color 0.6s ease; }
+.tg-gauge-track { position: relative; height: 14px; border-radius: 999px; background: var(--track); margin-top: 4px; }
+.tg-gauge-fill { height: 100%; border-radius: 999px; width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.6s ease; }
+.tg-gauge-tick { position: absolute; left: 50%; top: -4px; width: 3px; height: 22px; background: var(--red); border-radius: 2px; }
+.tg-gauge-scale { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-2); margin-top: 4px; }
+.tg-gauge-redline { color: var(--red); font-weight: 600; }
+
+/* ---------- Phone (worker view) ---------- */
+.tg-phone-shell {
+    max-width: 440px; margin: 0.5rem auto 1rem auto;
+    border-radius: 32px; padding: 1.5rem 1.4rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    transition: border-color 0.6s ease;
+}
+.tg-phone-notch { width: 96px; height: 6px; border-radius: 999px; background: var(--track); margin: 0 auto 1.2rem auto; }
+.tg-phone-eyebrow { font-size: 0.75rem; text-transform: uppercase; color: var(--text-2); margin-bottom: 4px; }
+.tg-phone-status { font-size: 1.55rem; font-weight: 800; transition: color 0.6s ease; }
+.tg-phone-wbgt { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; margin: 10px 0; }
+.tg-phone-action, .tg-phone-promise { font-size: 1.05rem; padding: 10px; border-radius: 12px; margin-bottom: 8px; }
+.tg-phone-action { background: rgba(2, 132, 199, 0.10); }
+.tg-phone-promise { background: rgba(16, 185, 129, 0.10); }
+
+/* ---------- Footer ---------- */
+.tg-footer { font-size: 0.82rem; color: var(--text-2); padding: 1rem 0 0.5rem 0; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 640px) {
+    .tg-hero { padding: 1.3rem 1.2rem; }
+    .tg-hero-title { font-size: 1.8rem; }
+    #mapContainer { height: 360px; }
+    .tg-page { padding: 1rem 1rem 3rem 1rem; }
+}

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# Environment and secrets (never commit keys)
+.env
+.env.local
+*.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Tests and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build artefacts
+dist/
+build/
+*.egg-info/
