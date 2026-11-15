@@ -1,0 +1,16 @@
+# Pinned to the versions verified live on 2026-11-14.
+# streamlit, google-genai and pytest are pinned exactly; the rest use
+# minimum versions so a fresh install still resolves.
+streamlit==1.67.0
+pandas>=2.0
+requests>=2.31
+python-dotenv>=1.0
+google-genai==3.3.0
+pydantic>=2.0
+pytest==9.2.0
+# Optional: enables the ISO 7243 WBGT cross-check in the dashboard.
+# The dashboard works without it and shows a graceful note instead.
+pythermalcomfort>=4.0
+# Optional: enables the interactive Plotly strain chart.
+# The dashboard falls back to the plain line chart if Plotly is absent.
+plotly>=6.0
