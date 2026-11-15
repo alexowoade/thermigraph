@@ -13,6 +13,18 @@ A 100% client-side HTML/CSS/JavaScript implementation of the **ThermiGraph AI** 
 - **`logic.js`** — Pure, zero-DOM biometeorological and clinical business logic ported directly from the Python modules (`physics_engine.py`, `strain_timeline.py`, `shift_optimizer.py`, `dashboard_logic.py`, and `triage.py`). Uses half-to-even banker's rounding (`roundTo`) to guarantee zero numerical drift against Python.
 - **`app.js`** — Asynchronous Open-Meteo telemetry client with 1-hour `localStorage` caching, reactive state management across all 10 sections, and fault-tolerant rendering with automatic card fallbacks if external map or chart CDNs are blocked.
 
+**Python Reference Suite (v6.3.13):**
+
+- **`physics_engine.py`** — Stull wet-bulb approximation, convective wind-adjusted black-globe temperature, ISO 7243 WBGT calculation, and NIOSH acclimatised threshold evaluation.
+- **`strain_timeline.py`** — 6-day Cumulative Thermal Strain Index (0-4 daily points) and Nocturnal Recovery Debt (> 28.0 °C overnight minimum) engine.
+- **`shift_optimizer.py`** — Work-rest rotation planner for anonymised crews (Crew A, Crew B); heavy labour scheduled 06:00 to 10:00, shade break 12:30 to 15:00, prevented unsafe-hour calculations.
+- **`triage.py`** — Privacy-preserving clinical field-log parser with automated PII scrubbing ([Worker - Anonymised]), Arabic and Hindi/Urdu crew broadcasts, and deterministic offline fallback.
+- **`dashboard_logic.py`** — Core state aggregation, cost-of-inaction calculator, and compliance report generator.
+- **`dashboard.py`** — Streamlit command center interface (the Python entry point).
+- **`test_thermigraph.py`** — Automated pytest verification suite (15 passing tests).
+- **`fetch_mussafah.py`** — Live Open-Meteo telemetry smoke checker.
+- **`requirements.txt`** — Python dependencies (streamlit, google-genai, pytest, plotly, pythermalcomfort).
+
 ---
 
 ## 2. Key Interactive Capabilities
@@ -32,7 +44,7 @@ A 100% client-side HTML/CSS/JavaScript implementation of the **ThermiGraph AI** 
 
 ---
 
-## 3. Local Run & Static Deployment
+## 3. Local Run, Static Deployment & Verification
 
 No build step, backend server, or paid API key is required to run the client-side web app:
 
@@ -43,3 +55,11 @@ python3 -m http.server 8000
 ```
 
 To deploy on **Netlify**, drag and drop the repository folder containing `index.html`, `styles.css`, `logic.js`, and `app.js` onto https://app.netlify.com/drop.
+
+Run the Python reference suite and its 15 automated pytest tests:
+
+```bash
+pip install -r requirements.txt
+pytest test_thermigraph.py -v
+streamlit run dashboard.py
+```
