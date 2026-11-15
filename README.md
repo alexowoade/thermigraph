@@ -1,5 +1,7 @@
 # ThermiGraph AI — JavaScript Version
 
+**Live demo:** https://chipper-halva-04403d.netlify.app/
+
 A plain HTML/CSS/JavaScript rebuild of the ThermiGraph dashboard. Same numbers,
 same sections, same design system as the Streamlit version (v6.3.13), but with
 full JavaScript freedom: smooth count-up metrics, staggered fade-in, native
