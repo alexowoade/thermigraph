@@ -44,7 +44,7 @@ Occupational heat collapse and heat-induced kidney strain rarely result from a s
 | `docs/data-governance.md` | Data governance statement: no persistent storage, name redaction, Gemini disclosure. |
 | `docs/API.md` | API reference for all modules. |
 | `docs/FAQ.md` | Frequently asked questions. |
-| `docs/devpost-evidence-excerpt.md` | Clinical evidence text ready to paste into the Future Health submission. |
+| `docs/future-health-evidence-excerpt.md` | Clinical evidence text ready to paste into the Future Health submission. |
 | `docs/screenshots-checklist.md` | Six Future Health gallery screenshots plus mobile shots, with exact steps. |
 | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | Security policy, contributing guide, Contributor Covenant v2.1. Fill in the contact email placeholder before publishing. |
 | `coverage-note.md` | Measured coverage: 47% total (dashboard_logic 95%, triage 68%, physics 53%). No Codecov badge, coverage is below the level a badge would honestly show. |
@@ -201,6 +201,6 @@ languages (v21): +0 on the left, maximum on the right, because numbers in Arabic
 are written left-to-right. A native-speaker review of the Arabic clinical copy
 is still recommended before judging.
 
-In the Future Health submission text (Hack2skill, not Devpost), this is
+In the Future Health submission text (Hack2skill), this is
 "Full Arabic UI (English/Arabic) for the local UAE workforce, with numbers,
 formulas and sliders kept left-to-right", not "Bilingual page chrome only".

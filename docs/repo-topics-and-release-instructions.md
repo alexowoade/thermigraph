@@ -110,7 +110,7 @@ $15/year, and this prototype does not need one. Keep the Netlify
 subdomain (`https://chipper-halva-04403d.netlify.app/`) as the live
 URL. If a domain is ever bought in future, keep the Netlify subdomain
 working as a redirect to it - do not break the URL already submitted
-to the challenge and already in the video and Devpost.
+to the challenge and already in the video and Future Health.
 
 ## 6. Uptime monitor (UptimeRobot, free tier)
 

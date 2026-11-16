@@ -1,6 +1,6 @@
-# Devpost paste-ready excerpt - "Clinical evidence" section
+# Future Health paste-ready excerpt - "Clinical evidence" section
 
-Copy the text below into the Devpost project story under a
+Copy the text below into the Future Health project story under a
 "Clinical evidence" heading. Do not add a quote, a reviewer, a pilot,
 or a real user - none is claimed.
 

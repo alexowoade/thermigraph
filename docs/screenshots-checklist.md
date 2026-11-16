@@ -1,8 +1,8 @@
-# Devpost gallery screenshots - checklist
+# Future Health gallery screenshots - checklist
 
 Live site: https://chipper-halva-04403d.netlify.app/
 Target: 6 desktop shots + 3 mobile shots, all JPG, 1440 px wide
-(desktop), uploaded via Devpost Edit Project > Gallery. Take the
+(desktop), uploaded via Future Health Edit Project > Gallery. Take the
 shots on the live site, not on localhost, so the gallery matches what
 a judge sees. Check the live WBGT numbers and the date in each shot
 before saving - do not reuse a shot from another day and present it
@@ -21,7 +21,7 @@ as today's reading.
    when exporting (see "Export" below).
 4. Keep the heat-spike slider at +0 C unless a shot says otherwise.
    Write down the live values visible in each shot (WBGT, date, site)
-   so the Devpost captions are accurate.
+   so the Future Health captions are accurate.
 
 ## The 6 desktop shots
 
@@ -143,15 +143,15 @@ no horizontal scrollbar, buttons reachable.
 4. Delete any shot with a spinner, an error banner, a cut-off chart,
    or a stale date. Retake it; do not upload it "for now".
 
-## Upload to Devpost
+## Upload to Future Health
 
-1. Devpost > your ThermiGraph project > **Edit Project**.
+1. Future Health > your ThermiGraph project > **Edit Project**.
 2. Scroll to **Gallery** (images/video). Upload the 6 desktop shots
    first, in order 01-06, then the 3 mobile shots.
 3. Add a caption to each image (use the caption ideas above, corrected
    to the actual values in the shot).
 4. Keep the video (https://youtu.be/iv_KnkdgBH0, 2:53) as the first
-   gallery item if Devpost orders video first; do not remove it to
+   gallery item if Future Health orders video first; do not remove it to
    make room for images.
 5. Save, then open the public project page in a private/incognito
    window and check every image loads and every caption is correct.
