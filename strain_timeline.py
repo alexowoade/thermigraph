@@ -38,9 +38,9 @@ def daily_points(max_wbgt, recovery_debt):
     return points
 
 
-def main():
+def main(clothing: str = "light_civilian"):
     url = "https://api.open-meteo.com/v1/forecast"
-    params = {
+    params: dict[str, str | float | int] = {
         "latitude": LATITUDE,
         "longitude": LONGITUDE,
         "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m,shortwave_radiation",
@@ -61,7 +61,7 @@ def main():
         day = time_text[:10]
         by_day[day].append(i)
 
-    print(f"{PLACE} strain timeline")
+    print(f"{PLACE} strain timeline (clothing: {clothing})")
     print("Past 3 days plus today plus next 2 days")
     print("Cumulative Thermal Strain Index is a prototype score.")
     print()
@@ -80,7 +80,7 @@ def main():
             temp_c = hourly["temperature_2m"][i]
             humidity = hourly["relative_humidity_2m"][i]
             solar = hourly["shortwave_radiation"][i]
-            wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i])
+            wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i], clothing=clothing)
             if wbgt > max_wbgt:
                 max_wbgt = wbgt
             if wbgt > 26.0:
@@ -99,7 +99,7 @@ def main():
         print(f"  Nocturnal Recovery Debt: {debt_text}, day points {points}, cumulative {cumulative}")
 
     print()
-    print(f"Red line: cumulative 12 over these 6 days.")
+    print("Red line: cumulative 12 over these 6 days.")
     if cumulative >= 12:
         print("Flag: cumulative strain is high, crew is crossing the red line.")
     else:

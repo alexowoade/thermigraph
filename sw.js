@@ -1,6 +1,6 @@
-/* ThermiGraph PWA service worker v16 - cache-first for app shell, network-first for live weather */
-const CACHE = 'thermigraph-v16';
-const SHELL = ['./', './index.html', './app.js', './logic.js', './styles.css', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
+/* ThermiGraph PWA service worker v20 - cache-first for app shell, network-first for live weather */
+const CACHE = 'thermigraph-v21';
+const SHELL = ['./', './index.html', './app.js', './logic.js', './styles.css', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './og-image.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });

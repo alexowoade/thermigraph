@@ -83,6 +83,24 @@ a { color: var(--accent); }
 html[dir="rtl"] .tg-table th, html[dir="rtl"] .tg-table td { text-align: right; }
 html[dir="rtl"] .tg-slider-value { text-align: left; }
 
+/* v19 RTL FIX: Arabic chrome stays RTL, but English-untranslated blocks
+   must stay LTR, otherwise full stops jump to the start of the line,
+   "21.7 °C" renders as "C° 21.7", "+0 °C" as "C° 0+", and flex/grid
+   order reverses (Ruwais first, Very heavy first, table columns reversed).
+   Nothing here rotates anything; it only pins direction on the English
+   blocks. Apply .tg-keep-ltr in index.html / app.js to those blocks. */
+.tg-keep-ltr { direction: ltr; unicode-bidi: isolate; text-align: left; }
+.tg-keep-ltr th, .tg-keep-ltr td { text-align: left; }
+html[dir="rtl"] .tg-keep-ltr { direction: ltr; unicode-bidi: isolate; text-align: left; }
+html[dir="rtl"] .tg-keep-ltr th, html[dir="rtl"] .tg-keep-ltr td { text-align: left; }
+/* Keep the order of cards / pills / table columns in these containers. */
+html[dir="rtl"] .tg-metric-grid.tg-keep-ltr,
+html[dir="rtl"] .tg-niosh-grid.tg-keep-ltr,
+html[dir="rtl"] .tg-split.tg-keep-ltr,
+html[dir="rtl"] .tg-gauge-scale.tg-keep-ltr { direction: ltr; }
+/* Leaflet and Plotly keep their own internal layout; pin their boxes LTR too. */
+#mapContainer.tg-keep-ltr, #compareMapContainer.tg-keep-ltr, #strainChart.tg-keep-ltr { direction: ltr; unicode-bidi: isolate; }
+
 /* ---------- Top bar ---------- */
 .tg-topbar {
     position: sticky;
@@ -425,4 +443,33 @@ html[data-theme="dark"] .tg-status { color: #fbbf24; }
     border: 1px solid rgba(2, 132, 199, 0.35);
     border-radius: 12px; padding: 0.9rem 1.1rem; margin: 0.8rem 0;
     font-weight: 600; color: var(--text);
+}
+
+/* v17 PWA install button */
+#installBtn[hidden] { display: none; }
+#installBtn { border: 1px solid var(--accent, #0284c7); }
+.tg-pwa-status { font-size: 0.75rem; color: var(--text-2); margin-left: 0.5rem; }
+
+/* v20: metric values are numbers first (with a $/~/unit prefix at
+   most), so they stay LTR in both languages. Arabic labels around them
+   are RTL in Arabic mode because their containers are not pinned. */
+.tg-metric-value, .tg-gauge-number { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] .tg-map-label { direction: rtl; }
+
+/* v19: the Install app button is always visible; only appinstalled hides it. */
+#installBtn { border: 1px solid var(--accent, #0284c7); }
+
+/* v21: sliders always run left-to-right, in English AND Arabic.
+   In Arabic RTL mode the browser flips range inputs, so +0 starts on the
+   right and +10 is on the left. The user asked for +0 / minimum always on
+   the left, maximum on the right, thumb moving right as the value rises.
+   Only the slider track/thumb direction is pinned LTR; labels, value text
+   and surrounding layout stay in Arabic RTL as before. */
+input[type="range"], .tg-slider {
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+html[dir="rtl"] input[type="range"], html[dir="rtl"] .tg-slider {
+    direction: ltr;
+    unicode-bidi: isolate;
 }

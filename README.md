@@ -44,8 +44,8 @@ Occupational heat collapse and heat-induced kidney strain rarely result from a s
 | `docs/data-governance.md` | Data governance statement: no persistent storage, name redaction, Gemini disclosure. |
 | `docs/API.md` | API reference for all modules. |
 | `docs/FAQ.md` | Frequently asked questions. |
-| `docs/devpost-evidence-excerpt.md` | Clinical evidence text ready to paste into Devpost. |
-| `docs/screenshots-checklist.md` | Six Devpost gallery screenshots plus mobile shots, with exact steps. |
+| `docs/devpost-evidence-excerpt.md` | Clinical evidence text ready to paste into the Future Health submission. |
+| `docs/screenshots-checklist.md` | Six Future Health gallery screenshots plus mobile shots, with exact steps. |
 | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` | Security policy, contributing guide, Contributor Covenant v2.1. Fill in the contact email placeholder before publishing. |
 | `coverage-note.md` | Measured coverage: 47% total (dashboard_logic 95%, triage 68%, physics 53%). No Codecov badge, coverage is below the level a badge would honestly show. |
 | `liljegren-note.md` | Why Liljegren was NOT added: pythermalcomfort `wbgt()` takes wet bulb as input and its wet-bulb function is Stull, so a Liljegren method would be Stull-vs-Stull. Stull remains the only method. |
@@ -116,13 +116,13 @@ GEMINI_API_KEY = "your_api_key_here"
 
 *(The API key is never committed to the repository. If `GEMINI_API_KEY` is omitted or offline, `triage.py` automatically routes requests through its deterministic clinical fallback engine so all 10 dashboard sections remain 100% functional.)*
 
-No live Streamlit Cloud URL was found in this repo as of 2026-11-16. When you deploy it, fill the URL in here and in Devpost, and check: triage says `Gemini Structured GenAI` (key set) or `Deterministic Clinical Fallback Engine` (key missing), and the ISO 7243 cross-check caption is present (`pythermalcomfort` installed; if missing, add `libgomp1` to `packages.txt` and reboot the app).
+No live Streamlit Cloud URL was found in this repo as of 2026-11-16. When you deploy it, fill the URL in here and in the Future Health submission, and check: triage says `Gemini Structured GenAI` (key set) or `Deterministic Clinical Fallback Engine` (key missing), and the ISO 7243 cross-check caption is present (`pythermalcomfort` installed; if missing, add `libgomp1` to `packages.txt` and reboot the app).
 
 ### Netlify (static JS version, v15)
 
 Drag the `thermigraph-js-v15` folder onto https://app.netlify.com/sites/chipper-halva-04403d/deploys only. Never use the Netlify Drop homepage (it creates a new site) and never use `netlify-cli`. One production deploy costs 15 credits; confirm your remaining quota before deploying.
 
-The static JS version has no live Gemini triage (that runs in Python only) and no pythermalcomfort cross-check; it shows the ISO 7243 weighting caption only. That is not a fake cross-check, recomputing the same formula in JS would add no information. In Devpost, label both URLs: Netlify = JS dashboard, Streamlit = Python with live triage and ISO cross-check.
+The static JS version has no live Gemini triage (that runs in Python only) and no pythermalcomfort cross-check; it shows the ISO 7243 weighting caption only. That is not a fake cross-check, recomputing the same formula in JS would add no information. In the Future Health submission, label both URLs: Netlify = JS dashboard, Streamlit = Python with live triage and ISO cross-check.
 
 ---
 
@@ -181,8 +181,26 @@ What the project *does* rest on is published evidence and passing tests, documen
 
 ## Language support
 
-Page chrome, navigation, hero, and crew broadcasts are bilingual (English / Arabic,
-with RTL flip on `dir="rtl"`). Body copy, tables, chart labels, and the worker
-view remain in English. Full Arabic body translation is listed as Future work.
+Full Arabic included (JS dashboard v20, 2026-11-16, sliders pinned LTR in v21).
 
-In the Devpost text, this is "Bilingual page chrome and crew broadcasts (Arabic/English); body content is English", not "Full Arabic UI".
+The Arabic toggle translates all user-facing text, not just the page chrome:
+all 11 section headings, hero, buttons, labels, captions and footer; Section 11
+Clinical Evidence prose, limitations and validation list; NIOSH limits and
+work/rest rules; shift, strain and compare table headers; cost calculator;
+triage labels; worker view; the downloaded compliance report (.txt, Arabic when
+Arabic is active); chart title and limit labels; map zone names (Mussafah مصفح,
+KEZAD كيزاد, Ruwais الرويس, English name kept in parentheses); clothing and
+worksite selector options; guided tour; and the PWA install button and status.
+213 English keys / 213 Arabic keys, 0 missing. Language persists in
+localStorage `thermigraph_lang`, English is the default and fallback.
+
+Kept in English and pinned left-to-right: author names, journal titles, years,
+DOIs, the WBGT formula, worker notes and symptom names, numbers, units (°C, %,
+km/h, W/m²), dates and ≤ signs. All sliders are pinned left-to-right in both
+languages (v21): +0 on the left, maximum on the right, because numbers in Arabic
+are written left-to-right. A native-speaker review of the Arabic clinical copy
+is still recommended before judging.
+
+In the Future Health submission text (Hack2skill, not Devpost), this is
+"Full Arabic UI (English/Arabic) for the local UAE workforce, with numbers,
+formulas and sliders kept left-to-right", not "Bilingual page chrome only".

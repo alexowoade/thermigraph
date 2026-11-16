@@ -12,7 +12,7 @@ cd ~/thermigraph
 ```
 
 Expected: test_thermigraph.py 17 passed, test_validation.py 9 passed, total 26 passed.
-If the count differs, update README and Devpost to the actual number.
+If the count differs, update README and the Future Health submission to the actual number.
 Do not report a number you have not seen print on your own machine.
 
 ## 2. Ruff (10 min)
@@ -64,7 +64,7 @@ Do not use `# type: ignore` without a comment explaining why.
 2. F12, Ctrl+Shift+M, select "iPhone SE"
 3. Walk all sections top to bottom, screenshot anything broken
 4. Take 3 mobile screenshots: hero, map, worker view
-5. Upload to Devpost gallery as mobile_hero.jpg, mobile_map.jpg, mobile_worker.jpg
+5. Upload to the Future Health gallery as mobile_hero.jpg, mobile_map.jpg, mobile_worker.jpg
 6. Also test on a real phone against the live Netlify URL. DevTools emulates, it is not perfect.
 
 ## 6. Arabic re-scope (5 min, done in README)
@@ -72,7 +72,7 @@ Do not use `# type: ignore` without a comment explaining why.
 README now has a Language support section: page chrome, navigation, hero, and
 crew broadcasts are bilingual English/Arabic with RTL flip. Body copy, tables,
 chart labels, and the worker view remain in English. Full Arabic body
-translation is Future work. Use that wording in Devpost, not "Full Arabic UI".
+translation is now full Arabic (v20). Use that wording in the Future Health submission: "Full Arabic UI (English/Arabic)".
 
 ## 7. Liljegren note (5 min, done)
 

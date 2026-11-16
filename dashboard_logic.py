@@ -19,7 +19,7 @@ from shift_optimizer import work_rest
 from strain_timeline import RECOVERY_DEBT_NIGHT_MIN, daily_points
 
 
-def compute_timeline_and_strain(hourly: dict, spike_c: float):
+def compute_timeline_and_strain(hourly: dict, spike_c: float, clothing: str = "light_civilian"):
     """Computes hourly WBGT chart data and Module 2 daily cumulative strain table."""
     chart_rows = []
     by_day = defaultdict(list)
@@ -34,6 +34,7 @@ def compute_timeline_and_strain(hourly: dict, spike_c: float):
             hourly["relative_humidity_2m"][i],
             hourly["shortwave_radiation"][i],
             winds[i],
+            clothing=clothing,
         )
         chart_rows.append({"time": time_text, "WBGT estimate (C)": round(wbgt, 2)})
 
@@ -52,7 +53,7 @@ def compute_timeline_and_strain(hourly: dict, spike_c: float):
             temp_c = hourly["temperature_2m"][i] + spike_c
             humidity = hourly["relative_humidity_2m"][i]
             solar = hourly["shortwave_radiation"][i]
-            wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i])
+            wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i], clothing=clothing)
             if wbgt > max_wbgt:
                 max_wbgt = wbgt
             if wbgt > 26.0:
@@ -83,7 +84,7 @@ def compute_timeline_and_strain(hourly: dict, spike_c: float):
     return pd.DataFrame(chart_rows), pd.DataFrame(daily_rows), cumulative, debt_days_count
 
 
-def compute_shift_schedule(hourly: dict, spike_c: float):
+def compute_shift_schedule(hourly: dict, spike_c: float, clothing: str = "light_civilian"):
     """Computes Module 4 tomorrow shift schedule (06:00 to 17:00) and prevention KPIs."""
     all_days = sorted({t[:10] for t in hourly["time"]})
     tomorrow_text = all_days[4] if len(all_days) > 4 else (date.today() + timedelta(days=1)).isoformat()
@@ -101,7 +102,7 @@ def compute_shift_schedule(hourly: dict, spike_c: float):
         temp_c = hourly["temperature_2m"][i] + spike_c
         humidity = hourly["relative_humidity_2m"][i]
         solar = hourly["shortwave_radiation"][i]
-        wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i])
+        wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i], clothing=clothing)
 
         if wbgt > 26.0:
             unsafe_heavy_hours_prevented += 1
@@ -139,7 +140,7 @@ def compute_shift_schedule(hourly: dict, spike_c: float):
     )
 
 
-def compute_compare_sites(site_hourly: dict, spike_c: float = 0.0, site_current_wbgt: dict | None = None):
+def compute_compare_sites(site_hourly: dict, spike_c: float = 0.0, site_current_wbgt: dict | None = None, clothing: str = "light_civilian"):
     """Builds the global compare-sites table from each site's hourly forecast.
 
     site_hourly maps a site display name to its Open-Meteo hourly dict.
@@ -172,6 +173,7 @@ def compute_compare_sites(site_hourly: dict, spike_c: float = 0.0, site_current_
                 hourly["relative_humidity_2m"][mid],
                 hourly["shortwave_radiation"][mid],
                 winds[mid],
+                clothing=clothing,
             )
         for _day, indexes in sorted(by_day.items()):
             night_temps = []
@@ -183,6 +185,7 @@ def compute_compare_sites(site_hourly: dict, spike_c: float = 0.0, site_current_
                     hourly["relative_humidity_2m"][i],
                     hourly["shortwave_radiation"][i],
                     winds[i],
+                    clothing=clothing,
                 )
                 if wbgt > max_wbgt:
                     max_wbgt = wbgt

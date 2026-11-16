@@ -67,6 +67,29 @@ def test_clothing_unknown_falls_back_to_zero():
     assert unknown == base
 
 
+def test_clothing_impermeable_raises_wbgt_by_exactly_4c():
+    """Impermeable suit must raise WBGT by exactly +4.0 C at the same inputs."""
+    base, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="light_civilian")
+    suit, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="impermeable_suit")
+    assert suit - base == 4.0
+    # And the chart values must shift by the same amount, not just the headline.
+    hourly = _synthetic_hourly(day_temp_c=30.0, night_temp_c=24.0)
+    chart_light, _, _, _ = compute_timeline_and_strain(hourly, 0.0, clothing="light_civilian")
+    chart_suit, _, _, _ = compute_timeline_and_strain(hourly, 0.0, clothing="impermeable_suit")
+    diffs = chart_suit["WBGT estimate (C)"] - chart_light["WBGT estimate (C)"]
+    assert (diffs == 4.0).all()
+
+
+def test_timeline_strain_does_not_decrease_with_heavier_clothing():
+    """Heavier clothing must never lower the cumulative strain total."""
+    hourly = _synthetic_hourly(day_temp_c=30.0, night_temp_c=24.0)
+    _, _, strain_light, _ = compute_timeline_and_strain(hourly, 0.0, clothing="light_civilian")
+    _, _, strain_coveralls, _ = compute_timeline_and_strain(hourly, 0.0, clothing="coveralls")
+    _, _, strain_ppe, _ = compute_timeline_and_strain(hourly, 0.0, clothing="construction_ppe")
+    _, _, strain_suit, _ = compute_timeline_and_strain(hourly, 0.0, clothing="impermeable_suit")
+    assert strain_suit >= strain_ppe >= strain_coveralls >= strain_light
+
+
 def test_niosh_continuous_work_limits():
     """Verify NIOSH workload threshold checks at 27.0 C WBGT (Heavy & Very heavy over limit)."""
     lines = niosh_check(27.0)

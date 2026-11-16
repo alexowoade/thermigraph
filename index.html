@@ -38,6 +38,8 @@
         <div class="tg-topbar-controls">
             <button id="themeToggle" class="tg-btn tg-btn-ghost" type="button" title="Switch between Clinical Daylight and Obsidian Dark" aria-label="Toggle dark mode">🌙 Dark</button>
             <button id="langToggle" class="tg-btn tg-btn-ghost" type="button" title="Switch language / تغيير اللغة" aria-label="Switch language / تغيير اللغة">العربية</button>
+            <button id="installBtn" class="tg-btn tg-btn-ghost" type="button" title="Install ThermiGraph on this device" aria-label="Install ThermiGraph app">Install app</button>
+            <span id="pwaStatus" class="tg-pwa-status tg-keep-ltr" aria-live="polite"></span>
             <button id="refreshBtn" class="tg-btn" type="button" title="Reload the live Open-Meteo telemetry" aria-label="Refresh live data" data-i18n="refresh">🔄 Refresh live data</button>
         </div>
     </div>
@@ -57,7 +59,7 @@
         <p class="tg-hero-tagline" data-i18n="tagline">From a single hot hour to a 6-day physiological debt — ThermiGraph catches heat collapse before Day 3.</p>
         <p class="tg-hero-sub" id="heroSubtitle">Temporal Biometeorological and Field-Triage Engine | Future Health Digital Innovation Challenge 2026. WBGT values are prototype estimates from weather telemetry, not calibrated on-site globe meter readings.</p>
         <div class="tg-btn-row" style="margin-top: 1rem; margin-bottom: 0;">
-            <button id="btnTour" class="tg-btn tg-btn-large" type="button" title="Walk a judge through the story, step by step. You control the pace, it never advances on its own." aria-label="Play the guided demo tour">▶ Play the story — guided demo tour</button>
+            <button id="btnTour" class="tg-btn tg-btn-large" type="button" title="Walk a judge through the story, step by step. You control the pace, it never advances on its own." aria-label="Play the guided demo tour" data-i18n="tourBtn">▶ Play the story — guided demo tour</button>
         </div>
     </header>
 
@@ -68,11 +70,11 @@
         <div class="tg-metric-grid" id="zoneCards"></div>
         <p class="tg-caption" id="liveCaption">Loading live readings…</p>
         <div class="tg-map-wrap">
-            <div id="mapContainer" role="img" aria-label="Map of the Abu Dhabi pilot corridor showing live WBGT for Mussafah, KEZAD and Ruwais. One circle per zone: bigger means hotter, colour is the NIOSH status."></div>
+            <div id="mapContainer" class="tg-keep-ltr" role="img" data-i18n-aria="mapAria1" aria-label="Map of the Abu Dhabi pilot corridor showing live WBGT for Mussafah, KEZAD and Ruwais. One circle per zone: bigger means hotter, colour is the NIOSH status."></div>
             <div id="mapFallback" class="tg-map-fallback" hidden></div>
         </div>
-        <p class="tg-caption">Real map of the Abu Dhabi host pilot corridor. One circle per zone: bigger means hotter (circle size scales with live WBGT). Colour is the NIOSH status.</p>
-        <p class="tg-caption">Bar colours by current WBGT: green &lt; 25 °C, amber 25–26 °C, orange 26–28 °C, red &gt; 28 °C.</p>
+        <p class="tg-caption" data-i18n="s1cap1">Real map of the Abu Dhabi host pilot corridor. One circle per zone: bigger means hotter (circle size scales with live WBGT). Colour is the NIOSH status.</p>
+        <p class="tg-caption" data-i18n-html="s1cap2">Bar colours by current WBGT: green &lt; 25 °C, amber 25–26 °C, orange 26–28 °C, red &gt; 28 °C.</p>
     </section>
 
     <hr class="tg-divider">
@@ -85,31 +87,38 @@
             <button id="btnLagos" class="tg-btn" type="button" title="One click to the most dramatic state: Lagos with a +6°C heat spike." aria-label="Show Lagos with a plus 6 degrees heat spike" data-i18n="lagosBtn">▶ Lagos +6°C demo</button>
             <button id="btnMussafah" class="tg-btn" type="button" title="Reset the worksite to Mussafah and the spike to +0°C." aria-label="Reset the worksite to Mussafah" data-i18n="mussafahBtn">↺ Back to Mussafah</button>
         </div>
-        <label class="tg-field-label" for="siteSelect">Select Active Worksite for Deep-Dive Simulation, 6-Day Strain Timeline &amp; Shift Plan</label>
+        <label class="tg-field-label" for="siteSelect" data-i18n="siteLabel">Select Active Worksite for Deep-Dive Simulation, 6-Day Strain Timeline &amp; Shift Plan</label>
         <select id="siteSelect" class="tg-select"></select>
         <div id="customGps" class="tg-gps-row" hidden>
             <div>
-                <label class="tg-field-label" for="customLat">Custom Latitude</label>
-                <input id="customLat" class="tg-input" type="number" step="0.0001" min="-60" max="70" value="6.4402">
+                <label class="tg-field-label" for="customLat" data-i18n="customLat">Custom Latitude</label>
+                <input id="customLat" class="tg-input tg-keep-ltr" type="number" step="0.0001" min="-60" max="70" value="24.3613">
             </div>
             <div>
-                <label class="tg-field-label" for="customLon">Custom Longitude</label>
-                <input id="customLon" class="tg-input" type="number" step="0.0001" min="-180" max="180" value="4.0193">
+                <label class="tg-field-label" for="customLon" data-i18n="customLon">Custom Longitude</label>
+                <input id="customLon" class="tg-input tg-keep-ltr" type="number" step="0.0001" min="-180" max="180" value="54.5038">
             </div>
         </div>
-        <label class="tg-field-label" for="spikeSlider">Simulate Extreme Heatwave Anomaly (+°C added to live telemetry)</label>
+        <label class="tg-field-label" for="clothingSelect" data-i18n="clothingLabel">Clothing / PPE (ISO 7243 Annex C)</label>
+        <select id="clothingSelect" class="tg-select" aria-label="Clothing and PPE, ISO 7243 Annex C clothing adjustment">
+            <option value="light_civilian" data-i18n="clothingLight">Light civilian (+0 °C)</option>
+            <option value="coveralls" data-i18n="clothingCoveralls">Coveralls (+1 °C)</option>
+            <option value="construction_ppe" data-i18n="clothingPPE">Construction PPE (+2 °C)</option>
+            <option value="impermeable_suit" data-i18n="clothingSuit">Impermeable suit (+4 °C)</option>
+        </select>
+        <label class="tg-field-label" for="spikeSlider" data-i18n-html="spikeLabel">Simulate Extreme Heatwave Anomaly (+°C added to live telemetry)</label>
         <div class="tg-slider-row">
             <input id="spikeSlider" type="range" min="0" max="10" step="1" value="0" class="tg-slider">
-            <span id="spikeValue" class="tg-slider-value">+0 °C</span>
+            <span id="spikeValue" class="tg-slider-value tg-keep-ltr">+0 °C</span>
         </div>
         <div class="tg-split">
-            <div class="tg-metric" id="spikedMetric"></div>
-            <div class="tg-glass-card">
-                <div class="tg-kicker">NIOSH Work-Intensity Limits (Acclimatised, Continuous Work)</div>
-                <div class="tg-niosh-grid" id="nioshChips"></div>
+            <div class="tg-metric tg-keep-ltr" id="spikedMetric"></div>
+            <div class="tg-glass-card tg-keep-ltr">
+                <div class="tg-kicker" data-i18n="nioshTitle">NIOSH Work-Intensity Limits (Acclimatised, Continuous Work)</div>
+                <div class="tg-niosh-grid tg-keep-ltr" id="nioshChips"></div>
             </div>
         </div>
-        <p class="tg-caption" id="isoCaption">WBGT follows the ISO 7243 weighting (0.7 wet bulb + 0.2 globe + 0.1 dry bulb).</p>
+        <p class="tg-caption" id="isoCaption" data-i18n-html="isoCaption">WBGT follows the ISO 7243 weighting (0.7 wet bulb + 0.2 globe + 0.1 dry bulb).</p>
         <div id="spikeAlert" class="tg-alert" hidden></div>
     </section>
 
@@ -119,27 +128,27 @@
     <section class="tg-section tg-anim" data-anim="3" id="section3">
         <div class="tg-kicker" data-i18n="kicker3">Multi-Day Physiological Debt</div>
         <h2 id="h-s3">3. Cumulative Strain Over 6 Days &amp; Nocturnal Recovery Debt</h2>
-        <div id="strainChart" class="tg-chart" role="img" aria-label="Chart of cumulative thermal strain over 6 days, with the red line at 12 points"></div>
-        <div class="tg-table-wrap" id="strainTableWrap"></div>
+        <div id="strainChart" class="tg-chart tg-keep-ltr" role="img" data-i18n-aria="chartAria" aria-label="Chart of cumulative thermal strain over 6 days, with the red line at 12 points"></div>
+        <div class="tg-table-wrap tg-keep-ltr" id="strainTableWrap"></div>
         <div id="strainBanner" class="tg-alert" hidden></div>
         <div class="tg-gauge">
             <div class="tg-gauge-top">
-                <span class="tg-gauge-label">Cumulative Strain</span>
+                <span class="tg-gauge-label" data-i18n="gaugeLabel">Cumulative Strain</span>
                 <span class="tg-gauge-number" id="gaugeNumber">0 / 12</span>
             </div>
             <div class="tg-gauge-track">
                 <div class="tg-gauge-fill" id="gaugeFill"></div>
                 <div class="tg-gauge-tick"></div>
             </div>
-            <div class="tg-gauge-scale"><span>0</span><span class="tg-gauge-redline">Red line 12</span><span>24 max</span></div>
+            <div class="tg-gauge-scale tg-keep-ltr"><span>0</span><span class="tg-gauge-redline" data-i18n-html="gaugeRedline">Red line 12</span><span data-i18n-html="gaugeMax">24 max</span></div>
         </div>
-        <p class="tg-caption">Cumulative Thermal Strain Index is an explainable prototype risk score (0–4 points/day from peak WBGT + Nocturnal Recovery Debt &gt;28°C), not a clinical diagnosis.</p>
-        <label class="tg-field-label" for="daySlider">📅 Drag through the 6 days — watch the strain build</label>
+        <p class="tg-caption" data-i18n-html="s3cap">Cumulative Thermal Strain Index is an explainable prototype risk score (0–4 points/day from peak WBGT + Nocturnal Recovery Debt &gt;28°C), not a clinical diagnosis.</p>
+        <label class="tg-field-label" for="daySlider" data-i18n="daySliderLabel">📅 Drag through the 6 days — watch the strain build</label>
         <div class="tg-slider-row">
             <input id="daySlider" type="range" min="1" max="6" step="1" value="6" class="tg-slider">
             <span id="dayValue" class="tg-slider-value">Day 6</span>
         </div>
-        <div class="tg-scrub-readout" id="dayReadout">Drag the slider to step through each day.</div>
+        <div class="tg-scrub-readout" id="dayReadout" data-i18n="dayReadoutHint">Drag the slider to step through each day.</div>
     </section>
 
     <hr class="tg-divider">
@@ -154,14 +163,14 @@
             <div class="tg-metric" id="kpiDebt"></div>
         </div>
         <p id="shiftIntro" class="tg-body"></p>
-        <div class="tg-table-wrap" id="shiftTableWrap"></div>
-        <label class="tg-field-label" for="baSlider">⚖️ Before / after — drag to apply the rest schedule</label>
+        <div class="tg-table-wrap tg-keep-ltr" id="shiftTableWrap"></div>
+        <label class="tg-field-label" for="baSlider" data-i18n="baLabel">⚖️ Before / after — drag to apply the rest schedule</label>
         <div class="tg-slider-row">
             <input id="baSlider" type="range" min="0" max="100" step="5" value="100" class="tg-slider">
             <span id="baValue" class="tg-slider-value">100%</span>
         </div>
-        <div class="tg-ba-labels"><span>0% — no rest schedule</span><span>100% — full rest schedule</span></div>
-        <p class="tg-caption">The two numbers above scale with the slider: at 0% nothing is prevented, at 100% the full schedule is applied.</p>
+        <div class="tg-ba-labels"><span data-i18n-html="ba0">0% — no rest schedule</span><span data-i18n-html="ba100">100% — full rest schedule</span></div>
+        <p class="tg-caption" data-i18n-html="s4cap">The two numbers above scale with the slider: at 0% nothing is prevented, at 100% the full schedule is applied.</p>
     </section>
 
     <hr class="tg-divider">
@@ -170,14 +179,14 @@
     <section class="tg-section tg-anim" data-anim="5" id="section5">
         <div class="tg-kicker" data-i18n="kicker5">Structured Clinical Extraction</div>
         <h2 id="h-s5">5. AI Field-Log Triage &amp; Multilingual Crew Dispatch (Privacy-Preserving)</h2>
-        <label class="tg-field-label" for="caseSelect">Select Clinical Field Scenario Preset (or customize note below)</label>
+        <label class="tg-field-label" for="caseSelect" data-i18n="caseLabel">Select Clinical Field Scenario Preset (or customize note below)</label>
         <select id="caseSelect" class="tg-select"></select>
-        <label class="tg-field-label" for="noteInput">Supervisor field note (EN/AR/HI — worker names auto-redacted)</label>
+        <label class="tg-field-label" for="noteInput" data-i18n="noteLabel">Supervisor field note (EN/AR/HI — worker names auto-redacted)</label>
         <textarea id="noteInput" class="tg-textarea" rows="4"></textarea>
         <button id="btnTriage" class="tg-btn tg-btn-large" type="button" aria-label="Run triage on the field note" data-i18n="triageBtn">🚀 Run triage</button>
-        <p class="tg-caption" id="triageEngine" hidden></p>
-        <div class="tg-table-wrap" id="triageTableWrap"></div>
-        <p class="tg-caption">Boundary: structured extraction for preventive occupational triage only — not a medical diagnosis. Names redacted at the crew level.</p>
+        <p class="tg-caption tg-keep-ltr" id="triageEngine" hidden></p>
+        <div class="tg-table-wrap tg-keep-ltr" id="triageTableWrap"></div>
+        <p class="tg-caption" data-i18n="s5cap">Boundary: structured extraction for preventive occupational triage only — not a medical diagnosis. Names redacted at the crew level.</p>
     </section>
 
     <hr class="tg-divider">
@@ -186,7 +195,7 @@
     <section class="tg-section tg-anim" data-anim="6" id="section6">
         <div class="tg-kicker" data-i18n="kicker6">Audit &amp; Governance Trail</div>
         <h2 id="h-s6">6. Exportable Compliance &amp; Triage Report</h2>
-        <p class="tg-body">Download the full compliance report: live zone telemetry, the active worksite and spike, the 6-day strain index, the shift plan, the latest anonymised triage, and the scope disclosures.</p>
+        <p class="tg-body" data-i18n="s6body">Download the full compliance report: live zone telemetry, the active worksite and spike, the 6-day strain index, the shift plan, the latest anonymised triage, and the scope disclosures.</p>
         <button id="btnReport" class="tg-btn tg-btn-large" type="button" aria-label="Download compliance report as text file" data-i18n="reportBtn">⬇️ Download compliance report (.txt)</button>
     </section>
 
@@ -196,10 +205,10 @@
     <section class="tg-section tg-anim" data-anim="7" id="section7">
         <div class="tg-kicker" data-i18n="kicker7">Cross-Continental Benchmarking</div>
         <h2 id="h-s7">7. Global Compare-Sites View</h2>
-        <p class="tg-body">One table, four sentinel corridors, same physics and thresholds. This is the argument that ThermiGraph is global.</p>
-        <div id="compareMapContainer" role="img" aria-label="World map showing live WBGT for the four sentinel corridors: Mussafah, Lagos, Delhi and Houston. One circle per site: bigger means hotter, colour is the NIOSH status."></div>
-        <div class="tg-table-wrap" id="compareTableWrap"></div>
-        <p class="tg-caption">World map: one circle per sentinel corridor, bigger means hotter (circle size scales with live WBGT). Colour is the NIOSH status. Current WBGT is the live reading; 6-day max and debt days use the same rolling window and thresholds as Section 3.</p>
+        <p class="tg-body" data-i18n="s7body">One table, four sentinel corridors, same physics and thresholds. This is the argument that ThermiGraph is global.</p>
+        <div id="compareMapContainer" class="tg-keep-ltr" role="img" data-i18n-aria="mapAria2" aria-label="World map showing live WBGT for the four sentinel corridors: Mussafah, Lagos, Delhi and Houston. One circle per site: bigger means hotter, colour is the NIOSH status."></div>
+        <div class="tg-table-wrap tg-keep-ltr" id="compareTableWrap"></div>
+        <p class="tg-caption" data-i18n="s7cap">World map: one circle per sentinel corridor, bigger means hotter (circle size scales with live WBGT). Colour is the NIOSH status. Current WBGT is the live reading; 6-day max and debt days use the same rolling window and thresholds as Section 3.</p>
     </section>
 
     <hr class="tg-divider">
@@ -208,14 +217,14 @@
     <section class="tg-section tg-anim" data-anim="8" id="section8">
         <div class="tg-kicker" data-i18n="kicker8">Health System &amp; Employer Economics</div>
         <h2 id="h-s8">8. Impact / ROI Panel (Pilot Scale)</h2>
-        <p class="tg-body">Pilot-scale estimates for the Abu Dhabi host corridor. All figures are planning estimates, clearly labelled.</p>
+        <p class="tg-body" data-i18n="s8body">Pilot-scale estimates for the Abu Dhabi host corridor. All figures are planning estimates, clearly labelled.</p>
         <div class="tg-metric-grid tg-metric-grid-4">
-            <div class="tg-metric"><div class="tg-metric-label">Workers currently protected</div><div class="tg-metric-value" data-count="4500">4,500</div><div class="tg-metric-delta">3 zones × 1,500 per zone (est.)</div></div>
-            <div class="tg-metric"><div class="tg-metric-label">Physical WBGT meters replaced</div><div class="tg-metric-value" data-count="450">450</div><div class="tg-metric-delta">at $1,200 per unit (est.)</div></div>
-            <div class="tg-metric"><div class="tg-metric-label">Annual hardware savings (est.)</div><div class="tg-metric-value" data-count="540000" data-prefix="$">$540,000</div><div class="tg-metric-delta">no per-site hardware</div></div>
-            <div class="tg-metric"><div class="tg-metric-label">Heat-illness cases prevented / year</div><div class="tg-metric-value" data-count="180" data-prefix="~">~180</div><div class="tg-metric-delta">ILO rate × exposure hours (est.)</div></div>
+            <div class="tg-metric"><div class="tg-metric-label" data-i18n="roi1label">Workers currently protected</div><div class="tg-metric-value" data-count="4500">4,500</div><div class="tg-metric-delta" data-i18n="roi1delta">3 zones × 1,500 per zone (est.)</div></div>
+            <div class="tg-metric"><div class="tg-metric-label" data-i18n="roi2label">Physical WBGT meters replaced</div><div class="tg-metric-value" data-count="450">450</div><div class="tg-metric-delta" data-i18n="roi2delta">at $1,200 per unit (est.)</div></div>
+            <div class="tg-metric"><div class="tg-metric-label" data-i18n="roi3label">Annual hardware savings (est.)</div><div class="tg-metric-value" data-count="540000" data-prefix="$">$540,000</div><div class="tg-metric-delta" data-i18n="roi3delta">no per-site hardware</div></div>
+            <div class="tg-metric"><div class="tg-metric-label" data-i18n="roi4label">Heat-illness cases prevented / year</div><div class="tg-metric-value" data-count="180" data-prefix="~">~180</div><div class="tg-metric-delta" data-i18n="roi4delta">ILO rate × exposure hours (est.)</div></div>
         </div>
-        <p class="tg-caption">Estimates for planning only. Hardware cost = published price of a calibrated 150 mm black-globe WBGT meter; case rates follow ILO occupational heat-stress reporting.</p>
+        <p class="tg-caption" data-i18n-html="s8cap">Estimates for planning only. Hardware cost = published price of a calibrated 150 mm black-globe WBGT meter; case rates follow ILO occupational heat-stress reporting.</p>
     </section>
 
     <hr class="tg-divider">
@@ -226,20 +235,20 @@
         <h2 id="h-s9">9. Cost-of-Inaction Calculator</h2>
         <div class="tg-form-grid">
             <div>
-                <label class="tg-field-label" for="coWorkers">Exposed workers</label>
+                <label class="tg-field-label" for="coWorkers" data-i18n="coWorkersLabel">Exposed workers</label>
                 <input id="coWorkers" class="tg-input" type="number" min="10" max="100000" step="100" value="1500">
             </div>
             <div>
-                <label class="tg-field-label" for="coDays">Exposure days</label>
+                <label class="tg-field-label" for="coDays" data-i18n="coDaysLabel">Exposure days</label>
                 <input id="coDays" class="tg-input" type="number" min="1" max="365" step="1" value="5">
             </div>
             <div>
-                <label class="tg-field-label" for="coWbgt">Site WBGT (°C)</label>
+                <label class="tg-field-label" for="coWbgt" data-i18n-html="coWbgtLabel">Site WBGT (°C)</label>
                 <input id="coWbgt" class="tg-input" type="number" min="20" max="45" step="0.5" value="26.0">
             </div>
         </div>
         <div class="tg-metric-grid tg-metric-grid-4" id="coResults"></div>
-        <p class="tg-caption">Illustrative model, not epidemiology: incidence 0.3 cases / 1,000 workers / day / °C above 26 °C heavy-work limit; 8% hospitalise; $400 per case, $4,000 per hospitalisation; enforced rest cuts projected cases 65%. Real deployment would calibrate against site-specific HSE records and ILO/WHO regional baselines.</p>
+        <p class="tg-caption" data-i18n-html="s9cap">Illustrative model, not epidemiology: incidence 0.3 cases / 1,000 workers / day / °C above 26 °C heavy-work limit; 8% hospitalise; $400 per case, $4,000 per hospitalisation; enforced rest cuts projected cases 65%. Real deployment would calibrate against site-specific HSE records and ILO/WHO regional baselines.</p>
     </section>
 
     <hr class="tg-divider">
@@ -248,22 +257,22 @@
     <section class="tg-section tg-anim" data-anim="10" id="section10">
         <div class="tg-kicker" data-i18n="kicker10">Last-Mile Field Equity</div>
         <h2 id="h-s10">10. Worker-Facing View</h2>
-        <p class="tg-body">The same data, stripped for the worker holding the phone. One number, one action, one promise.</p>
+        <p class="tg-body" data-i18n="s10body">The same data, stripped for the worker holding the phone. One number, one action, one promise.</p>
         <div class="tg-kicker" data-i18n="kickerDemo">Live Demo Control</div>
-        <label class="tg-field-label" for="demoSlider">🎬 Demo slider — drag to watch the phone react</label>
+        <label class="tg-field-label" for="demoSlider" data-i18n="demoLabel">🎬 Demo slider — drag to watch the phone react</label>
         <div class="tg-slider-row">
             <input id="demoSlider" type="range" min="0" max="10" step="1" value="0" class="tg-slider">
             <span id="demoValue" class="tg-slider-value">+0 °C</span>
         </div>
         <div class="tg-phone-shell" id="phoneShell">
             <div class="tg-phone-notch"></div>
-            <div class="tg-phone-eyebrow">Worker Mobile Alert</div>
+            <div class="tg-phone-eyebrow" data-i18n="phoneEyebrow">Worker Mobile Alert</div>
             <div class="tg-phone-status" id="phoneStatus">OK — WORK NORMALLY</div>
-            <div class="tg-phone-wbgt" id="phoneWbgt">Mussafah — 0.0 °C</div>
-            <div class="tg-phone-action">💧 <b>Drink 1 cup of ORS now, then rest in shade.</b></div>
-            <div class="tg-phone-promise">🛡️ <b>Reporting symptoms will not affect your pay.</b></div>
+            <div class="tg-phone-wbgt tg-keep-ltr" id="phoneWbgt">Mussafah — 0.0 °C</div>
+            <div class="tg-phone-action" data-i18n-html="phoneAction">💧 <b>Drink 1 cup of ORS now, then rest in shade.</b></div>
+            <div class="tg-phone-promise" data-i18n-html="phonePromise">🛡️ <b>Reporting symptoms will not affect your pay.</b></div>
         </div>
-        <p class="tg-caption">Worker view is a mock: same live WBGT as the supervisor dashboard, reduced to one status, one action, and the non-punitive promise.</p>
+        <p class="tg-caption" data-i18n="s10cap">Worker view is a mock: same live WBGT as the supervisor dashboard, reduced to one status, one action, and the non-punitive promise.</p>
     </section>
 
     <hr class="tg-divider">
@@ -273,43 +282,43 @@
     <section class="tg-section tg-anim tg-evidence" data-anim="11" id="section11">
         <div class="tg-kicker" data-i18n="kicker11">Evidence &amp; Limits</div>
         <h2 id="h-s11">11. Clinical Evidence &amp; Validation</h2>
-        <p class="tg-body">ThermiGraph is a prototype. This section states what the science supports, what the code has been tested for, and what is not proven. No expert quote, clinician name, or real pilot is claimed here.</p>
+        <p class="tg-body" data-i18n="s11intro">ThermiGraph is a prototype. This section states what the science supports, what the code has been tested for, and what is not proven. No expert quote, clinician name, or real pilot is claimed here.</p>
 
-        <h3>WBGT formula</h3>
-        <p class="tg-body">Outdoors, in direct sun: WBGT = 0.7 × natural wet bulb + 0.2 × black globe + 0.1 × dry bulb. In shade or indoors: WBGT = 0.7 × natural wet bulb + 0.3 × black globe. ThermiGraph uses the outdoor weighting, with wet bulb by the Stull formula and black globe estimated from solar radiation. That is a prototype simplification of the Liljegren model below, not a calibrated meter reading.</p>
+        <h3 data-i18n="s11hFormula">WBGT formula</h3>
+        <p class="tg-body" data-i18n-html="s11formula">Outdoors, in direct sun: WBGT = 0.7 × natural wet bulb + 0.2 × black globe + 0.1 × dry bulb. In shade or indoors: WBGT = 0.7 × natural wet bulb + 0.3 × black globe. ThermiGraph uses the outdoor weighting, with wet bulb by the Stull formula and black globe estimated from solar radiation. That is a prototype simplification of the Liljegren model below, not a calibrated meter reading.</p>
 
-        <h3>NIOSH work limits</h3>
-        <p class="tg-body">Recommended Exposure Limits, acclimatised workers, continuous work: Light 30 °C, Moderate 28 °C, Heavy 26 °C, Very heavy 25 °C. Unacclimatised workers are 2–3 °C lower. Above the limit, NIOSH prescribes work/rest scheduling: 45 work / 15 rest, then 30 / 30, then 15 / 45, then stop. ThermiGraph uses the acclimatised limits and the 45/15 and 30/30 steps.</p>
+        <h3 data-i18n="s11hNiosh">NIOSH work limits</h3>
+        <p class="tg-body" data-i18n-html="s11niosh">Recommended Exposure Limits, acclimatised workers, continuous work: Light 30 °C, Moderate 28 °C, Heavy 26 °C, Very heavy 25 °C. Unacclimatised workers are 2–3 °C lower. Above the limit, NIOSH prescribes work/rest scheduling: 45 work / 15 rest, then 30 / 30, then 15 / 45, then stop. ThermiGraph uses the acclimatised limits and the 45/15 and 30/30 steps.</p>
 
-        <h3>Multi-day strain and kidney injury</h3>
-        <p class="tg-body">The ThermiGraph claim is that heat stroke and acute kidney injury come from multi-day cumulative strain, not a single hot afternoon. In the Florida farmworker study below, over half of workers started the day dehydrated, 81% were dehydrated after a day of work, and one third had acute kidney injury at least once during three summer workdays. The odds of acute kidney injury rose 47% for each 5-degree increase in heat index, and kidney injury prevalence rose from 21% to 43% over three years in fernery workers. That supports tracking strain over 6 days and flagging failed overnight recovery when the night minimum stays above 28 °C.</p>
+        <h3 data-i18n="s11hMulti">Multi-day strain and kidney injury</h3>
+        <p class="tg-body" data-i18n-html="s11multi">The ThermiGraph claim is that heat stroke and acute kidney injury come from multi-day cumulative strain, not a single hot afternoon. In the Florida farmworker study below, over half of workers started the day dehydrated, 81% were dehydrated after a day of work, and one third had acute kidney injury at least once during three summer workdays. The odds of acute kidney injury rose 47% for each 5-degree increase in heat index, and kidney injury prevalence rose from 21% to 43% over three years in fernery workers. That supports tracking strain over 6 days and flagging failed overnight recovery when the night minimum stays above 28 °C.</p>
 
-        <h3>Validation tests: 8 / 8 passed</h3>
-        <p class="tg-body">Validation tests passed in the 2026-11-16 check, run with no network, no Gemini, and no patient data:</p>
+        <h3 data-i18n-html="s11hValid">Validation tests: 8 / 8 passed</h3>
+        <p class="tg-body" data-i18n="s11validIntro">Validation tests passed in the 2026-11-16 check, run with no network, no Gemini, and no patient data:</p>
         <ul>
-            <li>Stull wet bulb: 29.1 °C, 43% RH gives a wet bulb of 20.3 °C.</li>
-            <li>WBGT formula: 0.7 / 0.2 / 0.1 weighting on fixed wet bulb, globe and dry bulb inputs.</li>
-            <li>Live Mussafah WBGT estimate: 25.4 °C at 29.1 °C, 43% RH, 631 W/m² solar.</li>
-            <li>NIOSH limits: Light 30, Moderate 28, Heavy 26, Very heavy 25 °C.</li>
-            <li>Work/rest ratios: 60/0 up to 25 °C, 45/15 at 25–26 °C, 30/30 at 26–28 °C, no outdoor work above 28 °C.</li>
-            <li>Daily strain points: 1 point at 25.4 °C, 3 points above 28 °C, plus 1 point for recovery debt.</li>
-            <li>Recovery debt: night minimum above 28 °C flags yes, at or below 28 °C flags no.</li>
-            <li>Triage model: the sample note returns Critical, with vomiting and stopped sweating in the symptoms.</li>
+            <li data-i18n-html="s11v1">Stull wet bulb: 29.1 °C, 43% RH gives a wet bulb of 20.3 °C.</li>
+            <li data-i18n-html="s11v2">WBGT formula: 0.7 / 0.2 / 0.1 weighting on fixed wet bulb, globe and dry bulb inputs.</li>
+            <li data-i18n-html="s11v3">Live Mussafah WBGT estimate: 25.4 °C at 29.1 °C, 43% RH, 631 W/m² solar.</li>
+            <li data-i18n-html="s11v4">NIOSH limits: Light 30, Moderate 28, Heavy 26, Very heavy 25 °C.</li>
+            <li data-i18n-html="s11v5">Work/rest ratios: 60/0 up to 25 °C, 45/15 at 25–26 °C, 30/30 at 26–28 °C, no outdoor work above 28 °C.</li>
+            <li data-i18n-html="s11v6">Daily strain points: 1 point at 25.4 °C, 3 points above 28 °C, plus 1 point for recovery debt.</li>
+            <li data-i18n-html="s11v7">Recovery debt: night minimum above 28 °C flags yes, at or below 28 °C flags no.</li>
+            <li data-i18n="s11v8">Triage model: the sample note returns Critical, with vomiting and stopped sweating in the symptoms.</li>
         </ul>
 
-        <h3>Limitations, in plain words</h3>
+        <h3 data-i18n="s11hLimits">Limitations, in plain words</h3>
         <ul>
-            <li>WBGT is estimated from weather data, not measured with a globe meter.</li>
-            <li>Globe temperature is estimated from solar radiation, not measured.</li>
-            <li>No clothing, acclimatisation, age, or medical history is modelled.</li>
-            <li>The cumulative score of 12 is a prototype score, not a clinical threshold.</li>
-            <li>Triage is structured extraction from a typed note, not a medical diagnosis.</li>
-            <li>No real crew, no real shift, and no real meter reading are claimed.</li>
+            <li data-i18n="s11l1">WBGT is estimated from weather data, not measured with a globe meter.</li>
+            <li data-i18n="s11l2">Globe temperature is estimated from solar radiation, not measured.</li>
+            <li data-i18n-html="s11l3">Clothing correction (ISO 7243 Annex C, +0 / +1 / +2 / +4 °C) IS applied via the Clothing / PPE selector in Section 2. Acclimatisation, age, and medical history are still not modelled.</li>
+            <li data-i18n="s11l4">The cumulative score of 12 is a prototype score, not a clinical threshold.</li>
+            <li data-i18n="s11l5">Triage is structured extraction from a typed note, not a medical diagnosis.</li>
+            <li data-i18n="s11l6">No real crew, no real shift, and no real meter reading are claimed.</li>
         </ul>
-        <p class="tg-evidence-note">Expert review: none yet. No clinician has reviewed this prototype. That section will only be filled by a real reviewer, with name, qualification, organisation and date, and only with their consent.</p>
+        <p class="tg-evidence-note" data-i18n="s11expert">Expert review: none yet. No clinician has reviewed this prototype. That section will only be filled by a real reviewer, with name, qualification, organisation and date, and only with their consent.</p>
 
-        <h3>References</h3>
-        <ol class="tg-evidence-ref">
+        <h3 data-i18n="s11hRefs">References</h3>
+        <ol class="tg-evidence-ref tg-keep-ltr">
             <li>Liljegren, J.C., Carhart, R.A., Lawday, P., Tschopp, S., &amp; Sharp, R. (2008). Modeling the wet bulb globe temperature using standard meteorological measurements. <i>Journal of Occupational and Environmental Hygiene</i>, 5(10), 645–655. doi:10.1080/15459620802310770</li>
             <li>National Institute for Occupational Safety and Health (2016). Criteria for a Recommended Standard: Occupational Exposure to Heat and Hot Environments. NIOSH Publication No. 2016-106.</li>
             <li>Parsons, K. (2006). ISO 7243 and its Global Application. <i>Industrial Health</i>, 44, 368–379. ISO 7243, Hot environments — Estimation of the heat stress on working man, based on the WBGT index, first published 1982.</li>
@@ -330,9 +339,9 @@
         <div class="tg-tour-title" id="tourTitle"></div>
         <p class="tg-tour-text" id="tourText"></p>
         <div class="tg-tour-row">
-            <button id="tourPrev" class="tg-btn tg-btn-ghost" type="button" aria-label="Previous tour step">← Back</button>
-            <button id="tourNext" class="tg-btn" type="button" aria-label="Next tour step">Next →</button>
-            <button id="tourExit" class="tg-btn tg-btn-ghost" type="button" aria-label="Exit tour">✕ Exit tour</button>
+            <button id="tourPrev" class="tg-btn tg-btn-ghost" type="button" aria-label="Previous tour step" data-i18n="tourPrev">← Back</button>
+            <button id="tourNext" class="tg-btn" type="button" aria-label="Next tour step" data-i18n="tourNext">Next →</button>
+            <button id="tourExit" class="tg-btn tg-btn-ghost" type="button" aria-label="Exit tour" data-i18n="tourExit">✕ Exit tour</button>
             <span class="tg-tour-step" id="tourStep"></span>
         </div>
     </div>

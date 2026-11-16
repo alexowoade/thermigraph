@@ -74,6 +74,17 @@
         "Very heavy": 25.0,
     };
 
+    // Clothing adjustment (C), ISO 7243 Annex C, simplified — same values
+    // as Python physics_engine.py CLOTHING_CORRECTION. Effective WBGT =
+    // raw WBGT + correction: heavier / less permeable clothing RAISES the
+    // effective heat strain. Subtracting it would understate the risk.
+    const CLOTHING_CORRECTION = {
+        "light_civilian": 0.0,
+        "coveralls": 1.0,
+        "construction_ppe": 2.0,
+        "impermeable_suit": 4.0,
+    };
+
     // Wet bulb temperature in C, Stull (2011) empirical formula.
     function wetBulbStull(tempC, humidity) {
         const rh = Math.max(5.0, Math.min(99.9, Number(humidity)));
@@ -91,14 +102,17 @@
     // WBGT = 0.7 * wet bulb + 0.2 * black globe + 0.1 * dry bulb
     // At the reference wind speed of 10 km/h, windFactor == 1.0.
     // Returns [wbgt, wetBulb, blackGlobe].
-    function estimateWBGT(tempC, humidity, solarWm2, windKmh) {
+    function estimateWBGT(tempC, humidity, solarWm2, windKmh, clothing) {
         if (windKmh === undefined) windKmh = 10.0;
+        if (clothing === undefined) clothing = "light_civilian";
         const wetBulb = wetBulbStull(tempC, humidity);
         const effectiveWind = Math.max(2.0, Number(windKmh));
         const windFactor = Math.pow(10.0 / effectiveWind, 0.35);
         const solarIncrement = Math.min(18.0, Math.max(0.0, Number(solarWm2)) * 0.02 * windFactor);
         const blackGlobe = Number(tempC) + solarIncrement;
-        const wbgt = 0.7 * wetBulb + 0.2 * blackGlobe + 0.1 * Number(tempC);
+        const wbgtRaw = 0.7 * wetBulb + 0.2 * blackGlobe + 0.1 * Number(tempC);
+        const correction = CLOTHING_CORRECTION[clothing] !== undefined ? CLOTHING_CORRECTION[clothing] : 0.0;
+        const wbgt = wbgtRaw + correction;
         return [wbgt, wetBulb, blackGlobe];
     }
 
@@ -163,7 +177,8 @@
     // chartRows: [{ time, wbgt }] with wbgt rounded to 2 decimals.
     // dailyRows: [{ date, maxTemp, nightMin, maxWbgt, hoursOverHeavy,
     //               recoveryDebt ("YES (+1 pt)" or "No"), points, cumulative }]
-    function computeTimelineAndStrain(hourly, spikeC) {
+    function computeTimelineAndStrain(hourly, spikeC, clothing) {
+        if (clothing === undefined) clothing = "light_civilian";
         const n = hourly.time.length;
         const winds = hourly.wind_speed_10m || new Array(n).fill(10.0);
         const chartRows = [];
@@ -177,7 +192,8 @@
                 tempSpiked,
                 hourly.relative_humidity_2m[i],
                 hourly.shortwave_radiation[i],
-                winds[i]
+                winds[i],
+                clothing
             )[0];
             chartRows.push({ time: hourly.time[i], wbgt: roundTo(wbgt, 2) });
         }
@@ -197,7 +213,7 @@
                 const tempC = hourly.temperature_2m[i] + spikeC;
                 const humidity = hourly.relative_humidity_2m[i];
                 const solar = hourly.shortwave_radiation[i];
-                const wbgt = estimateWBGT(tempC, humidity, solar, winds[i])[0];
+                const wbgt = estimateWBGT(tempC, humidity, solar, winds[i], clothing)[0];
                 if (wbgt > maxWbgt) maxWbgt = wbgt;
                 if (wbgt > 26.0) hoursOverHeavy += 1;
                 if (hour < 6) nightTemps.push(tempC);
@@ -228,7 +244,8 @@
     // because past_days=3 gives 3 past days + today + 2 future days.
     // Returns { tomorrow, rows, preventedHours, coolingMinutes }.
     // rows: [{ hour, temp, wbgt, protocol, crew }]
-    function computeShiftSchedule(hourly, spikeC) {
+    function computeShiftSchedule(hourly, spikeC, clothing) {
+        if (clothing === undefined) clothing = "light_civilian";
         const allDays = Array.from(new Set(hourly.time.map(function (t) { return t.slice(0, 10); }))).sort();
         let tomorrowText;
         if (allDays.length > 4) {
@@ -251,7 +268,7 @@
             const tempC = hourly.temperature_2m[i] + spikeC;
             const humidity = hourly.relative_humidity_2m[i];
             const solar = hourly.shortwave_radiation[i];
-            const wbgt = estimateWBGT(tempC, humidity, solar, winds[i])[0];
+            const wbgt = estimateWBGT(tempC, humidity, solar, winds[i], clothing)[0];
             if (wbgt > 26.0) preventedHours += 1;
             let protocol, crew;
             if (hour >= 13 && hour < 15) {
@@ -283,8 +300,9 @@
     // ------------------------------------------------------------------
     // siteHourly: { siteName: hourlyDict }. siteCurrentWbgt: { siteName: wbgt }.
     // Returns rows: [{ site, currentWbgt, maxWbgt, debtDays, tier }]
-    function computeCompareSites(siteHourly, spikeC, siteCurrentWbgt) {
+    function computeCompareSites(siteHourly, spikeC, siteCurrentWbgt, clothing) {
         if (spikeC === undefined) spikeC = 0.0;
+        if (clothing === undefined) clothing = "light_civilian";
         const rows = [];
         for (const siteName of Object.keys(siteHourly)) {
             const hourly = siteHourly[siteName];
@@ -307,7 +325,8 @@
                     hourly.temperature_2m[mid] + spikeC,
                     hourly.relative_humidity_2m[mid],
                     hourly.shortwave_radiation[mid],
-                    winds[mid]
+                    winds[mid],
+                    clothing
                 )[0];
             }
             for (const day of Object.keys(byDay).sort()) {
@@ -319,7 +338,8 @@
                         tempC,
                         hourly.relative_humidity_2m[i],
                         hourly.shortwave_radiation[i],
-                        winds[i]
+                        winds[i],
+                        clothing
                     )[0];
                     if (wbgt > maxWbgt) maxWbgt = wbgt;
                     if (hour < 6) nightTemps.push(tempC);
@@ -482,6 +502,7 @@
         GLOBAL_SITES: GLOBAL_SITES,
         COMPARE_SITES: COMPARE_SITES,
         NIOSH_LIMITS: NIOSH_LIMITS,
+        CLOTHING_CORRECTION: CLOTHING_CORRECTION,
         wetBulbStull: wetBulbStull,
         estimateWBGT: estimateWBGT,
         nioshCheck: nioshCheck,

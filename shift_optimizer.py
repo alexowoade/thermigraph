@@ -37,12 +37,12 @@ def work_rest(wbgt):
     return 60, 0, "60 work / 0 rest"
 
 
-def main():
+def main(clothing: str = "light_civilian"):
     tomorrow = date.today() + timedelta(days=1)
     tomorrow_text = tomorrow.isoformat()
 
     url = "https://api.open-meteo.com/v1/forecast"
-    params = {
+    params: dict[str, str | float | int] = {
         "latitude": LATITUDE,
         "longitude": LONGITUDE,
         "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m,shortwave_radiation",
@@ -55,7 +55,7 @@ def main():
     hourly = data["hourly"]
     winds = hourly.get("wind_speed_10m", [10.0] * len(hourly["time"]))
 
-    print(f"{PLACE} shift plan for {tomorrow_text}")
+    print(f"{PLACE} shift plan for {tomorrow_text} (clothing: {clothing})")
     print("Heavy labour 06:00 to 10:00. Crews are anonymised: Crew A, Crew B.")
     print("Shade break 12:30 to 15:00, recommended in November.")
     print()
@@ -71,7 +71,7 @@ def main():
         temp_c = hourly["temperature_2m"][i]
         humidity = hourly["relative_humidity_2m"][i]
         solar = hourly["shortwave_radiation"][i]
-        wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i])
+        wbgt, _, _ = estimate_wbgt(temp_c, humidity, solar, winds[i], clothing=clothing)
 
         if 13 <= hour < 15:
             print(f"{hour:02d}:00  WBGT {wbgt:.1f} C  SHADE BREAK, no outdoor work")

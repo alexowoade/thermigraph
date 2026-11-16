@@ -24,7 +24,7 @@ from dashboard_logic import (
     cost_of_inaction,
     wbgt_iso_cross_check,
 )
-from physics_engine import estimate_wbgt, niosh_check
+from physics_engine import CLOTHING_CORRECTION, estimate_wbgt, niosh_check
 from triage import SCENARIO_PRESETS, run_field_triage
 
 # Primary Host-Country Pilot Corridor (Abu Dhabi)
@@ -43,6 +43,18 @@ GLOBAL_SITES = {
     "Houston — Petrochemical Corridor (USA / North America)": (29.7355, -95.2638),
     "Custom Global GPS Coordinates (Any Worksite Worldwide)": None,
 }
+
+# Clothing / PPE selector (ISO 7243 Annex C). Label shown in the UI -> code
+# passed to estimate_wbgt(). Effective WBGT = raw WBGT + correction, so
+# heavier PPE raises the effective WBGT and triggers stricter work-rest rules.
+CLOTHING_OPTIONS = {
+    "Light civilian (+0 °C)": "light_civilian",
+    "Coveralls (+1 °C)": "coveralls",
+    "Construction PPE (+2 °C)": "construction_ppe",
+    "Impermeable suit (+4 °C)": "impermeable_suit",
+}
+CLOTHING_LABELS = {code: label for label, code in CLOTHING_OPTIONS.items()}
+
 
 COMPARE_SITES = {
     "Mussafah (UAE)": (24.3613, 54.5038),
@@ -503,14 +515,37 @@ except Exception:
 def render_s1_s2():
     st.markdown('<div class="tg-kicker">Host Country Telemetry</div>', unsafe_allow_html=True)
     st.header(H("s1"))
+    clothing_label = st.selectbox(
+        "Clothing / PPE (ISO 7243 Annex C)",
+        list(CLOTHING_OPTIONS.keys()),
+        index=0,
+        key="clothing_select",
+        help="ISO 7243 Annex C clothing adjustment, added to the raw WBGT: light civilian +0, coveralls +1, construction PPE +2, impermeable suit +4 °C.",
+    )
+    clothing = CLOTHING_OPTIONS[clothing_label]
+    correction = CLOTHING_CORRECTION.get(clothing, 0.0)
     cols = st.columns(3)
     for col, name in zip(cols, ZONES, strict=True):
-        current, solar, wbgt, wet_bulb, globe = live[name]
+        current, solar, _wbgt_raw, wet_bulb, globe = live[name]
+        # Recompute with the chosen clothing: live[] was fetched at module
+        # load with light civilian, so the card must apply the correction here.
+        wbgt, _, _ = estimate_wbgt(
+            current["temperature_2m"],
+            current["relative_humidity_2m"],
+            solar,
+            current["wind_speed_10m"],
+            clothing=clothing,
+        )
         col.metric(
             f"{name} WBGT Estimate",
             f"{wbgt:.1f} °C",
             f"Air: {current['temperature_2m']}°C | RH: {current['relative_humidity_2m']}% | Wind: {current['wind_speed_10m']} km/h",
         )
+    st.caption(
+        f"Clothing / PPE: {clothing_label} — effective WBGT adds +{correction:.0f} °C "
+        "(ISO 7243 Annex C). Change the selector above and every WBGT, the strain "
+        "timeline and the shift plan update."
+    )
 
     first_current = next(iter(live.values()))[0]
     st.caption(f"Live readings as of {first_current['time']} (local site time, Open-Meteo).")
@@ -637,6 +672,7 @@ def render_s1_s2():
         active_current["relative_humidity_2m"],
         active_solar,
         active_current["wind_speed_10m"],
+        clothing=clothing,
     )
 
     s_col1, s_col2 = st.columns([1, 2])
@@ -644,7 +680,7 @@ def render_s1_s2():
         st.metric(
             f"{active_site_name} WBGT (with spike)",
             f"{spiked_wbgt:.1f} °C",
-            f"+{spike} °C anomaly | Wet-Bulb: {spiked_tw:.1f}°C | Globe: {spiked_tg:.1f}°C",
+            f"+{spike} °C anomaly | Clothing: {clothing_label} (+{correction:.0f} °C) | Wet-Bulb: {spiked_tw:.1f}°C | Globe: {spiked_tg:.1f}°C",
         )
     with s_col2:
         niosh_lines = niosh_check(spiked_wbgt)
@@ -676,10 +712,10 @@ def render_s1_s2():
     elif spiked_wbgt > 26.0:
         st.warning("HIGH STRAIN: Spiked WBGT exceeds the 26.0 °C Heavy work limit. Strict work-rest micro-rotations required.")
 
-    return active_lat, active_lon, active_site_name, spike, spiked_wbgt
+    return active_lat, active_lon, active_site_name, spike, spiked_wbgt, clothing
 
 
-def render_s3_s4(active_lat, active_lon, active_site_name, spike):
+def render_s3_s4(active_lat, active_lon, active_site_name, spike, clothing="light_civilian"):
     st.markdown('<div class="tg-kicker">Multi-Day Physiological Debt</div>', unsafe_allow_html=True)
     st.header(H("s3", f" ({active_site_name})"))
     try:
@@ -693,7 +729,11 @@ def render_s3_s4(active_lat, active_lon, active_site_name, spike):
             st.error(f"Hourly forecast for {active_site_name} is unavailable.")
             st.stop()
 
-    chart_df, daily_df, total_strain, debt_days = compute_timeline_and_strain(hourly_active, spike)
+    st.caption(
+        f"Clothing / PPE: {CLOTHING_LABELS.get(clothing, clothing)} — "
+        f"+{CLOTHING_CORRECTION.get(clothing, 0.0):.0f} °C applied to every WBGT estimate below (ISO 7243 Annex C)."
+    )
+    chart_df, daily_df, total_strain, debt_days = compute_timeline_and_strain(hourly_active, spike, clothing)
     chart_df["time"] = pd.to_datetime(chart_df["time"])
 
     plotted = False
@@ -749,7 +789,7 @@ def render_s3_s4(active_lat, active_lon, active_site_name, spike):
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="tg-kicker">Dynamic Crew Rotation</div>', unsafe_allow_html=True)
     st.header(H("s4", f" ({active_site_name})"))
-    tomorrow_date, shift_df, prevented_hrs, cooling_mins = compute_shift_schedule(hourly_active, spike)
+    tomorrow_date, shift_df, prevented_hrs, cooling_mins = compute_shift_schedule(hourly_active, spike, clothing)
 
     kpi1, kpi2, kpi3 = st.columns(3)
     kpi1.metric("Unsafe Heavy-Work Hours Prevented", f"{prevented_hrs} hrs / 12-hr shift", "Hours > 26.0 °C WBGT auto-restricted")
@@ -761,7 +801,7 @@ def render_s3_s4(active_lat, active_lon, active_site_name, spike):
     return total_strain, debt_days, prevented_hrs, cooling_mins
 
 
-def render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, total_strain, debt_days, prevented_hrs, cooling_mins):
+def render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, total_strain, debt_days, prevented_hrs, cooling_mins, clothing="light_civilian"):
     st.markdown('<div class="tg-kicker">Structured Clinical Extraction</div>', unsafe_allow_html=True)
     st.header(H("s5"))
     selected_case = st.selectbox("Select Clinical Field Scenario Preset (or customize note below)", list(SCENARIO_PRESETS.keys()))
@@ -808,16 +848,19 @@ def render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, t
     ]
     for name in ZONES:
         current, solar, wbgt, wet_bulb, globe = live[name]
+        # live[] is light-civilian; the report must show the clothing-adjusted value.
+        wbgt_report = wbgt + CLOTHING_CORRECTION.get(clothing, 0.0)
         report_lines.append(
             f"  - {name}: {current['time']} | Air {current['temperature_2m']} C | "
             f"RH {current['relative_humidity_2m']}% | Wind {current['wind_speed_10m']} km/h | "
-            f"Solar {solar} W/m2 | WBGT Est. {wbgt:.1f} C"
+            f"Solar {solar} W/m2 | WBGT Est. {wbgt_report:.1f} C"
         )
     report_lines.extend(
         [
             "",
             f"2. ACTIVE WORKSITE: {active_site_name} ({active_lat:.4f}, {active_lon:.4f})",
             f"   HEAT SPIKE: +{spike} C anomaly -> Spiked WBGT {spiked_wbgt:.1f} C",
+            f"   CLOTHING / PPE: {CLOTHING_LABELS.get(clothing, clothing)} (+{CLOTHING_CORRECTION.get(clothing, 0.0):.0f} C, ISO 7243 Annex C)",
             "   NIOSH Acclimatised Continuous Work Thresholds:",
             *niosh_check(spiked_wbgt),
             "",
@@ -855,7 +898,7 @@ def render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, t
     )
 
 
-def render_s7_s8_s9(spike, spiked_wbgt):
+def render_s7_s8_s9(spike, spiked_wbgt, clothing="light_civilian"):
     st.markdown('<div class="tg-kicker">Cross-Continental Benchmarking</div>', unsafe_allow_html=True)
     st.header(H("s7"))
     st.markdown("One table, four sentinel corridors, same physics and thresholds. This is the argument that ThermiGraph is global.")
@@ -865,7 +908,8 @@ def render_s7_s8_s9(spike, spiked_wbgt):
         for site_name, (clat, clon) in COMPARE_SITES.items():
             compare_hourly[site_name] = fetch_hourly_raw(clat, clon)
             if site_name in live:
-                compare_current[site_name] = live[site_name][2]
+                # live[] is light-civilian; apply the chosen clothing correction.
+                compare_current[site_name] = live[site_name][2] + CLOTHING_CORRECTION.get(clothing, 0.0)
             else:
                 # FIX #4 — compute real WBGT for non-cached sites, not raw temperature
                 c_cur, c_sol = fetch_live_raw(clat, clon)
@@ -874,9 +918,10 @@ def render_s7_s8_s9(spike, spiked_wbgt):
                     c_cur["relative_humidity_2m"],
                     c_sol,
                     c_cur["wind_speed_10m"],
+                    clothing=clothing,
                 )
                 compare_current[site_name] = c_wbgt
-        compare_df = compute_compare_sites(compare_hourly, spike, compare_current)
+        compare_df = compute_compare_sites(compare_hourly, spike, compare_current, clothing)
         st.dataframe(compare_df, use_container_width=True)
         st.caption("Current WBGT is the live reading; 6-day max and debt days use the same rolling window and thresholds as Section 3.")
     except Exception:
@@ -950,13 +995,13 @@ if layout_mode == "Tabbed Command Center":
         ["🌍 1–2. Telemetry", "📈 3–4. Strain & Shift", "🤖 5–6. Triage & Audit", "🌐 7–9. Compare & ROI", "📱 10. Worker View"]
     )
     with t1:
-        active_lat, active_lon, active_site_name, spike, spiked_wbgt = render_s1_s2()
+        active_lat, active_lon, active_site_name, spike, spiked_wbgt, clothing = render_s1_s2()
     with t2:
-        total_strain, debt_days, prevented_hrs, cooling_mins = render_s3_s4(active_lat, active_lon, active_site_name, spike)
+        total_strain, debt_days, prevented_hrs, cooling_mins = render_s3_s4(active_lat, active_lon, active_site_name, spike, clothing)
     with t3:
-        render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, total_strain, debt_days, prevented_hrs, cooling_mins)
+        render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, total_strain, debt_days, prevented_hrs, cooling_mins, clothing)
     with t4:
-        render_s7_s8_s9(spike, spiked_wbgt)
+        render_s7_s8_s9(spike, spiked_wbgt, clothing)
     with t5:
         # FIX #2 — demo slider inside Tab 5 so the phone reacts live
         st.markdown('<div class="tg-kicker">Live Demo Control</div>', unsafe_allow_html=True)
@@ -974,16 +1019,17 @@ if layout_mode == "Tabbed Command Center":
             demo_current["relative_humidity_2m"],
             demo_solar,
             demo_current["wind_speed_10m"],
+            clothing=clothing,
         )
         render_s10(active_site_name, demo_wbgt)
 else:
-    active_lat, active_lon, active_site_name, spike, spiked_wbgt = render_s1_s2()
+    active_lat, active_lon, active_site_name, spike, spiked_wbgt, clothing = render_s1_s2()
     st.markdown("---")
-    total_strain, debt_days, prevented_hrs, cooling_mins = render_s3_s4(active_lat, active_lon, active_site_name, spike)
+    total_strain, debt_days, prevented_hrs, cooling_mins = render_s3_s4(active_lat, active_lon, active_site_name, spike, clothing)
     st.markdown("---")
-    render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, total_strain, debt_days, prevented_hrs, cooling_mins)
+    render_s5_s6(active_lat, active_lon, active_site_name, spike, spiked_wbgt, total_strain, debt_days, prevented_hrs, cooling_mins, clothing)
     st.markdown("---")
-    render_s7_s8_s9(spike, spiked_wbgt)
+    render_s7_s8_s9(spike, spiked_wbgt, clothing)
     st.markdown("---")
     render_s10(active_site_name, spiked_wbgt)
 
