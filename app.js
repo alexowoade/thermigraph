@@ -1,6 +1,14 @@
 // ThermiGraph AI — app.js (JavaScript version)
 // The dashboard itself: fetches live Open-Meteo data in the browser, runs the
-// logic from logic.js, and renders all 10 sections. No Streamlit, no server.
+// logic from logic.js, and renders all 11 sections. No Streamlit, no server.
+// v14 (2026-11-16): strain chart unclipped, Section 11 Clinical Evidence
+// & Validation added, Abu Dhabi map re-fitted, scroll fade shortened
+// with a safety fallback so no section stays pale or blank.
+// v15 (2026-11-16): language toggle extended — all 11 headings (s11 was
+// missing), hero tagline/pills, kickers, top-bar and action buttons,
+// footer, RTL dir flip, persisted in localStorage "thermigraph_lang".
+// Body text, tables, chart and map labels stay English; see README v15
+// for exactly what is bilingual and what remains.
 // The map is Leaflet with CartoDB Voyager / Dark Matter tiles (the same
 // basemaps the Streamlit version uses). If Plotly fails to load, the chart
 // degrades to a note and the rest of the dashboard keeps working.
@@ -46,12 +54,49 @@
 
     // ------------------------------------------------------------------
     // Text (EN / AR) — same strings as the Streamlit dashboard.
-    // Only the hero and the section headings translate; the body stays English,
-    // exactly like the Streamlit version.
+    // v15 SCOPE (honest): the toggle translates the page chrome — hero,
+    // all 11 section headings, all kickers, hero pills, the top-bar and
+    // main action buttons, and the footer — and flips the page to RTL.
+    // It does NOT translate the body paragraphs, captions, tables,
+    // chart labels, map tooltips, triage extraction, or Section 11
+    // evidence text: those are rendered dynamically in JS (or are
+    // clinical text that must not be machine-translated without review).
+    // A full flip needs every render function to look strings up in
+    // this dictionary plus a translator review of the clinical copy.
+    // What IS fully bilingual already: the triage crew broadcasts
+    // (Arabic + Hindi/Urdu) in logic.js deterministicTriageFallback.
+    // Language persists in localStorage key "thermigraph_lang"
+    // (deliberately NOT "tg_..." so Refresh, which clears tg_* cache
+    // keys, does not wipe the language choice).
     // ------------------------------------------------------------------
     const EN = {
         title: "ThermiGraph AI",
         subtitle: "Temporal Biometeorological and Field-Triage Engine | Future Health Digital Innovation Challenge 2026.",
+        disclaimer: "WBGT values are prototype estimates from weather telemetry, not calibrated on-site globe meter readings.",
+        tagline: "From a single hot hour to a 6-day physiological debt — ThermiGraph catches heat collapse before Day 3.",
+        refresh: "🔄 Refresh live data",
+        themeLight: "☀️ Light",
+        themeDark: "🌙 Dark",
+        footer: "ThermiGraph AI — Prototype for the Future Health Digital Innovation Challenge 2026. Live data: Open-Meteo. WBGT values are prototype estimates from weather telemetry, not calibrated on-site globe meter readings. Not a medical device.",
+        pill1: "Open-Meteo Live Telemetry",
+        pill2: "ISO 7243 · NIOSH Physics",
+        pill3: "Privacy-by-Design Triage",
+        kicker1: "Host Country Telemetry",
+        kicker2: "Global Sentinel Simulation",
+        kicker3: "Multi-Day Physiological Debt",
+        kicker4: "Dynamic Crew Rotation",
+        kicker5: "Structured Clinical Extraction",
+        kicker6: "Audit & Governance Trail",
+        kicker7: "Cross-Continental Benchmarking",
+        kicker8: "Health System & Employer Economics",
+        kicker9: "Interactive Actuarial Model",
+        kicker10: "Last-Mile Field Equity",
+        kickerDemo: "Live Demo Control",
+        kicker11: "Evidence & Limits",
+        lagosBtn: "▶ Lagos +6°C demo",
+        mussafahBtn: "↺ Back to Mussafah",
+        triageBtn: "🚀 Run triage",
+        reportBtn: "⬇️ Download compliance report (.txt)",
         s1: "1. Live WBGT Telemetry (Abu Dhabi Host Pilot Corridor)",
         s2: "2. Global Worksite Selector & Heat Spike Simulator",
         s3: "3. Cumulative Strain Over 6 Days & Nocturnal Recovery Debt",
@@ -62,10 +107,36 @@
         s8: "8. Impact / ROI Panel (Pilot Scale)",
         s9: "9. Cost-of-Inaction Calculator",
         s10: "10. Worker-Facing View",
+        s11: "11. Clinical Evidence & Validation",
     };
     const AR = {
         title: "ثرميغراف — محرك الإجهاد الحراري",
         subtitle: "محرك الأرصاد الحيوية والفرز الميداني | تحدي الابتكار الصحي الرقمي 2026",
+        disclaimer: "قيم WBGT تقديرات أولية من قياسات الطقس، وليست قراءات معايرة من مقياس كروي في الموقع.",
+        tagline: "من ساعة حارة واحدة إلى دين فسيولوجي يمتد 6 أيام — ثرميغراف يكشف انهيار الحرارة قبل اليوم الثالث.",
+        refresh: "🔄 تحديث البيانات المباشرة",
+        themeLight: "☀️ فاتح",
+        themeDark: "🌙 داكن",
+        footer: "ثرميغراف — نموذج أولي لتحدي الابتكار الصحي الرقمي 2026. البيانات المباشرة: Open-Meteo. قيم WBGT تقديرات أولية من قياسات الطقس، وليست قراءات معايرة من مقياس كروي في الموقع. ليس جهازاً طبياً.",
+        pill1: "قياسات Open-Meteo المباشرة",
+        pill2: "فيزياء ISO 7243 · NIOSH",
+        pill3: "فرز يحفظ الخصوصية",
+        kicker1: "قياسات البلد المضيف",
+        kicker2: "محاكاة الحارس العالمي",
+        kicker3: "الدين الفسيولوجي متعدد الأيام",
+        kicker4: "تدوير الطاقم الديناميكي",
+        kicker5: "الاستخراج السريري المنظم",
+        kicker6: "سجل التدقيق والحوكمة",
+        kicker7: "المقارنة عبر القارات",
+        kicker8: "اقتصاديات النظام الصحي وأصحاب العمل",
+        kicker9: "نموذج اكتواري تفاعلي",
+        kicker10: "العدالة الميدانية للعامل",
+        kickerDemo: "التحكم في العرض التجريبي المباشر",
+        kicker11: "الأدلة والحدود",
+        lagosBtn: "▶ لاغوس +6°م عرض تجريبي",
+        mussafahBtn: "↺ العودة إلى مصفح",
+        triageBtn: "🚀 تشغيل الفرز",
+        reportBtn: "⬇️ تنزيل تقرير الامتثال (.txt)",
         s1: "1. قياسات WBGT المباشرة (ممر أبوظبي التجريبي)",
         s2: "2. محدد موقع العمل العالمي ومحاكي موجة الحر",
         s3: "3. الإجهاد الحراري التراكمي لمدة 6 أيام",
@@ -76,14 +147,23 @@
         s8: "8. الأثر والعائد على الاستثمار",
         s9: "9. حاسبة تكلفة التقاعس",
         s10: "10. عرض العامل",
+        s11: "11. الأدلة السريرية والتحقق",
     };
+
+    // Saved language ("en" default). Read once at boot; invalid values fall back to "en".
+    function savedLang() {
+        try {
+            const v = localStorage.getItem("thermigraph_lang");
+            return v === "ar" ? "ar" : "en";
+        } catch (e) { return "en"; }
+    }
 
     // ------------------------------------------------------------------
     // State
     // ------------------------------------------------------------------
     const state = {
         theme: "light",
-        lang: "en",
+        lang: savedLang(),
         siteLabel: "Mussafah (UAE — Host Pilot)",
         spike: 0,
         demoSpike: 0,
@@ -309,7 +389,14 @@
     function fitAbuDhabi() {
         if (!state.map) return;
         const zb = Object.keys(L.ZONES).map(function (n) { return [L.ZONES[n][0], L.ZONES[n][1]]; });
-        state.map.fitBounds(window.L.latLngBounds(zb), { padding: [36, 36] });
+        // v14 FIX (live check 2026-11-16): Ruwais, the southernmost zone,
+        // was cut off at the bottom edge of the map in the first viewport.
+        // Root cause: fitBounds padding was only 36 px, so the Ruwais
+        // circle and its pulsing ring sat right on the bottom edge.
+        // Fix: 70 px padding on all sides (zooms out slightly so every
+        // circle, ring and label has clear space), and re-fit after the
+        // page settles (see the extra 900 ms timeout in renderMap).
+        state.map.fitBounds(window.L.latLngBounds(zb), { padding: [70, 70] });
     }
 
     function renderMap() {
@@ -339,8 +426,11 @@
             state.mapRings = {};
             // Leaflet needs the box to have its final size; re-check after
             // the page settles and whenever the window resizes.
-            window.addEventListener("resize", function () { if (state.map) state.map.invalidateSize(); });
+            window.addEventListener("resize", function () { if (state.map) { state.map.invalidateSize(); fitAbuDhabi(); } });
             setTimeout(function () { if (state.map) { state.map.invalidateSize(); fitAbuDhabi(); } }, 300);
+            // v14: second re-fit after the fade-in finishes, so the map
+            // is fitted to its final settled size, not its mid-animation size.
+            setTimeout(function () { if (state.map) { state.map.invalidateSize(); fitAbuDhabi(); } }, 900);
             // Fit the view to the three Abu Dhabi zones so they are spread
             // out and their labels do not overlap (a fixed zoom on the whole
             // peninsula bunched them at the edge with hidden labels).
@@ -397,6 +487,9 @@
                 }
             }
         }
+        // v14: re-fit once the markers are in place, so Ruwais is never
+        // left on the bottom edge after a data refresh.
+        fitAbuDhabi();
         } catch (e) {
             // A map failure must never break the data load: clear the broken
             // map, show the error visibly, and fall back to the zone cards.
@@ -516,22 +609,51 @@
         const fontCol = isDark ? "#e2e8f0" : "#334155";
         const lineCol = isDark ? "#38bdf8" : "#0284c7";
         const data = [{ x: x, y: y, type: "scatter", mode: "lines", name: "WBGT estimate (C)", line: { color: lineCol, width: 2.6 } }];
+        // v14 FIX (live check 2026-11-16): the chart was clipped — top peaks
+        // cut flat, the "31" y-axis label half-cut, x-axis date labels
+        // half-cut, and the 26/28 °C limit labels running off the right
+        // edge. Root causes: fixed height 340 with margin b:10 / r:10,
+        // no explicit y-axis range (Plotly autoscaled tight to the data,
+        // so the highest points touched the top edge), and limit labels
+        // anchored at paper x=1 with no right margin to hold them.
+        // Fix: taller chart (420), generous margins on all sides, an
+        // explicit y-axis range padded 2 °C beyond the data and both
+        // limit lines, limit labels moved INSIDE the plot (x=0.98 paper,
+        // right-anchored, with a semi-transparent background), and
+        // angled x-axis ticks so date labels do not get cut at the bottom.
+        const yDataMin = y.length ? Math.min.apply(null, y.concat([26.0])) : 20;
+        const yDataMax = y.length ? Math.max.apply(null, y.concat([28.0])) : 28;
+        const yMin = Math.floor(yDataMin - 2);
+        const yMax = Math.ceil(yDataMax + 2);
+        const labelBg = isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)";
         const layout = {
             title: { text: "Hourly WBGT estimate, 6-day window", font: { color: fontCol, family: "Plus Jakarta Sans" } },
-            height: 340,
-            margin: { l: 60, r: 10, t: 40, b: 10 },
+            height: 420,
+            autosize: true,
+            margin: { l: 60, r: 30, t: 55, b: 60 },
             paper_bgcolor: "rgba(0,0,0,0)",
             plot_bgcolor: "rgba(0,0,0,0)",
             font: { color: fontCol, family: "Plus Jakarta Sans" },
-            xaxis: { gridcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)" },
-            yaxis: { gridcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)" },
+            xaxis: {
+                gridcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+                tickangle: -30,
+                tickfont: { size: 10 },
+                nticks: 6,
+                automargin: true
+            },
+            yaxis: {
+                gridcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+                range: [yMin, yMax],
+                autorange: false,
+                automargin: true
+            },
             shapes: [
                 { type: "line", x0: 0, x1: 1, xref: "paper", y0: 26.0, y1: 26.0, line: { color: "#f59e0b", dash: "dash" } },
                 { type: "line", x0: 0, x1: 1, xref: "paper", y0: 28.0, y1: 28.0, line: { color: "#f43f5e", dash: "dash" } },
             ],
             annotations: [
-                { x: 1, xref: "paper", y: 26.0, text: "Heavy limit 26 °C", showarrow: false, xanchor: "right", font: { color: "#f59e0b" } },
-                { x: 1, xref: "paper", y: 28.0, text: "Moderate limit 28 °C", showarrow: false, xanchor: "right", font: { color: "#f43f5e" } },
+                { x: 0.98, xref: "paper", y: 26.0, text: "Heavy limit 26 °C", showarrow: false, xanchor: "right", yanchor: "middle", bgcolor: labelBg, bordercolor: "#f59e0b", borderwidth: 1, font: { color: "#f59e0b", size: 11 } },
+                { x: 0.98, xref: "paper", y: 28.0, text: "Moderate limit 28 °C", showarrow: false, xanchor: "right", yanchor: "middle", bgcolor: labelBg, bordercolor: "#f43f5e", borderwidth: 1, font: { color: "#f43f5e", size: 11 } },
             ],
         };
         const config = { responsive: true, displayModeBar: false };
@@ -943,23 +1065,36 @@
     // ------------------------------------------------------------------
     // Theme + language
     // ------------------------------------------------------------------
+    function setThemeLabel() {
+        const T = state.lang === "ar" ? AR : EN;
+        const btn = $("themeToggle");
+        if (btn) btn.textContent = state.theme === "dark" ? T.themeLight : T.themeDark;
+    }
     function applyTheme() {
         document.documentElement.dataset.theme = state.theme;
-        $("themeToggle").textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        setThemeLabel();
         renderMap();
         if (state.activeHourly) renderSection3(); // re-draws the chart in the new colours
     }
     function applyLang() {
         const T = state.lang === "ar" ? AR : EN;
         document.documentElement.lang = state.lang === "ar" ? "ar" : "en";
+        document.documentElement.dir = state.lang === "ar" ? "rtl" : "ltr";
         $("heroTitle").textContent = T.title;
-        $("heroSubtitle").textContent = T.subtitle + " WBGT values are prototype estimates from weather telemetry, not calibrated on-site globe meter readings.";
-        for (let i = 1; i <= 10; i++) {
+        $("heroSubtitle").textContent = T.subtitle + " " + T.disclaimer;
+        for (let i = 1; i <= 11; i++) {
             const h = $("h-s" + i);
             if (h) { h.textContent = T["s" + i]; h.dir = "auto"; }
         }
+        // Every static element marked data-i18n="key" takes its text from the dict.
+        document.querySelectorAll("[data-i18n]").forEach(function (n) {
+            const v = T[n.getAttribute("data-i18n")];
+            if (typeof v === "string") n.textContent = v;
+        });
         $("heroTitle").dir = "auto";
         $("langToggle").textContent = state.lang === "ar" ? "English" : "العربية";
+        setThemeLabel();
+        try { localStorage.setItem("thermigraph_lang", state.lang); } catch (e) { /* storage blocked */ }
     }
 
     // ------------------------------------------------------------------
@@ -1191,12 +1326,13 @@
 
     // ------------------------------------------------------------------
     // Rich feature 5 — Animated counters (Section 8 impact numbers).
-    // FIX: the count-up was too fast (0.9s) and started at the same time as
-    // the section fade, so it finished while the section was still invisible
-    // and only ran once, so any screenshot after scrolling showed the final
-    // values. Now the count-up is slower (1.6s) and it starts AFTER its
-    // section has faded in (initScrollReveal calls animateCounter 400ms
-    // after the section becomes visible), so the numbers are seen moving.
+    // v14 FIX (live check 2026-11-16): screenshots caught the ROI
+    // numbers mid-count (2,163 workers / $259,548 instead of the final
+    // 4,500 / $540,000), because the count-up started 400 ms after a
+    // slow 0.9 s fade. Now the fade is 0.35 s (see styles.css), the
+    // counter starts 100 ms after the section becomes visible and
+    // finishes in 1.0 s, so a judge scrolling normally sees the final
+    // values, not a half-counted number.
     // ------------------------------------------------------------------
     function animateCounter(el) {
         if (!el || el.dataset.counted) return;
@@ -1204,7 +1340,7 @@
         const target = parseFloat(el.dataset.count) || 0;
         const prefix = el.dataset.prefix || "";
         const start = performance.now();
-        const dur = 1600;
+        const dur = 1000;
         function frame(now) {
             const p = Math.max(0, Math.min(1, (now - start) / dur));
             const eased = 1 - Math.pow(1 - p, 3);
@@ -1226,21 +1362,29 @@
     // ------------------------------------------------------------------
     // Rich feature 6 — Scroll-in animations.
     // Sections fade and slide up the first time they scroll into view.
-    // FIX: the fade was 0.6s with a 14px rise, too quick to notice. Now it
-    // is 0.9s with a 24px rise (see styles.css). Counters inside a section
-    // start 400ms after the section becomes visible, so they are seen moving.
+    // v14 FIX (live check 2026-11-16): Sections 6 and 8 rendered very
+    // pale / low-contrast on scroll, with a large pale blank area below
+    // Section 8 before Sections 9-10 faded in. Root causes: a 0.9 s
+    // fade, plus a stacked per-section delay of up to 60 ms x 11
+    // sections (set in boot), plus an IntersectionObserver threshold
+    // of 0.12 that only fired once 12% of a section was visible, so a
+    // fast scroll or a screenshot caught sections mid-fade at low
+    // opacity. Fix: the CSS fade is now 0.35 s with no delay (see
+    // styles.css), the observer fires earlier (threshold 0.05, with
+    // a 120 px root margin so the fade starts before the section
+    // enters the viewport), counters start 100 ms after reveal, and
+    // a 1,200 ms safety fallback reveals every section even if the
+    // observer never fires (for example in a screenshot or headless
+    // check), so no section can stay pale or blank.
     // ------------------------------------------------------------------
     function initScrollReveal() {
         const nodes = document.querySelectorAll(".tg-anim");
         if (!nodes.length) return;
         function reveal(node) {
             node.classList.add("tg-visible");
-            // Start any counters inside this section once the fade is
-            // underway, so the count-up is visible instead of finishing
-            // while the section is still hidden.
             setTimeout(function () {
                 node.querySelectorAll("[data-count]").forEach(animateCounter);
-            }, 400);
+            }, 100);
         }
         if (typeof IntersectionObserver === "undefined") {
             nodes.forEach(function (n) { reveal(n); });
@@ -1252,8 +1396,12 @@
                 reveal(entry.target);
                 obs.unobserve(entry.target);
             }
-        }, { threshold: 0.12 });
+        }, { threshold: 0.05, rootMargin: "120px 0px 120px 0px" });
         nodes.forEach(function (n) { obs.observe(n); });
+        // Safety fallback: never leave a section invisible.
+        setTimeout(function () {
+            nodes.forEach(function (n) { reveal(n); });
+        }, 1200);
     }
 
     // ------------------------------------------------------------------
@@ -1285,3 +1433,9 @@
     }
 })();
 
+// PWA v16: register service worker for installable offline shell. Live weather is network-first.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (err) { console.warn('Service worker registration failed:', err); });
+  });
+}

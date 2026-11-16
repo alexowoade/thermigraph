@@ -9,14 +9,13 @@
 #   - Metric deltas restored
 # Business logic lives in dashboard_logic.py so it can be unit-tested without Streamlit.
 
-from datetime import date, timedelta
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
 import pandas as pd
 import requests
 import streamlit as st
+from dotenv import load_dotenv
 
 from dashboard_logic import (
     compute_compare_sites,
@@ -505,7 +504,7 @@ def render_s1_s2():
     st.markdown('<div class="tg-kicker">Host Country Telemetry</div>', unsafe_allow_html=True)
     st.header(H("s1"))
     cols = st.columns(3)
-    for col, name in zip(cols, ZONES):
+    for col, name in zip(cols, ZONES, strict=True):
         current, solar, wbgt, wet_bulb, globe = live[name]
         col.metric(
             f"{name} WBGT Estimate",

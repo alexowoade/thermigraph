@@ -6,6 +6,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from typing import cast
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -247,7 +248,9 @@ def run_field_triage(
                         response_schema=TriageResult,
                     ),
                 )
-                parsed: TriageResult = response.parsed
+                if response.parsed is None:
+                    continue
+                parsed = cast(TriageResult, response.parsed)
                 parsed.worker_summary = redact_worker_name(parsed.worker_summary, note)
                 return parsed, f"Gemini Structured GenAI ({model_name})"
             except Exception:

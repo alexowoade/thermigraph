@@ -1,6 +1,17 @@
 # ThermiGraph AI — Automated Clinical & Biometeorological Verification Suite
 # Run with: pytest -v
 
+from datetime import date, timedelta
+
+import pytest
+
+from dashboard_logic import (
+    compute_compare_sites,
+    compute_shift_schedule,
+    compute_timeline_and_strain,
+    cost_of_inaction,
+    wbgt_iso_cross_check,
+)
 from physics_engine import estimate_wbgt, niosh_check, wet_bulb_stull
 from shift_optimizer import work_rest
 from strain_timeline import RECOVERY_DEBT_NIGHT_MIN, daily_points
@@ -34,6 +45,26 @@ def test_default_wind_backward_compatibility():
     wbgt, tw, tg = estimate_wbgt(35.0, 45.0, 600.0)
     assert tg == 35.0 + 600.0 * 0.02
     assert round(wbgt, 4) == round(0.7 * tw + 0.2 * tg + 0.1 * 35.0, 4)
+
+
+def test_clothing_correction_raises_wbgt():
+    """ISO 7243 Annex C: clothing adjustment is ADDED to measured WBGT."""
+    base, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="light_civilian")
+    coveralls, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="coveralls")
+    ppe, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="construction_ppe")
+    suit, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="impermeable_suit")
+    assert coveralls == base + 1.0
+    assert ppe == base + 2.0
+    assert suit == base + 4.0
+    # Heavier clothing must raise, never lower, the effective WBGT.
+    assert suit > ppe > coveralls > base
+
+
+def test_clothing_unknown_falls_back_to_zero():
+    """An unknown clothing label falls back to no correction (light civilian)."""
+    base, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0)
+    unknown, _, _ = estimate_wbgt(35.0, 50.0, 600.0, 10.0, clothing="space_suit")
+    assert unknown == base
 
 
 def test_niosh_continuous_work_limits():
@@ -95,17 +126,6 @@ def test_triage_offline_fallback_across_all_three_clinical_presets():
 
 
 # --- Integration tests for dashboard_logic.py (no Streamlit needed) ---
-from datetime import date, timedelta
-
-import pytest
-
-from dashboard_logic import (
-    compute_compare_sites,
-    compute_shift_schedule,
-    compute_timeline_and_strain,
-    cost_of_inaction,
-    wbgt_iso_cross_check,
-)
 
 
 def _synthetic_hourly(day_temp_c=30.0, night_temp_c=24.0, humidity=50.0, solar=500.0, wind=10.0, night_hot_day=None):

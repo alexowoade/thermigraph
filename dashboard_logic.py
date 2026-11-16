@@ -173,7 +173,7 @@ def compute_compare_sites(site_hourly: dict, spike_c: float = 0.0, site_current_
                 hourly["shortwave_radiation"][mid],
                 winds[mid],
             )
-        for day, indexes in sorted(by_day.items()):
+        for _day, indexes in sorted(by_day.items()):
             night_temps = []
             for i in indexes:
                 hour = int(hourly["time"][i][11:13])
@@ -253,7 +253,7 @@ def wbgt_iso_cross_check(twb_c: float, tg_c: float, tdb_c: float):
     installed, returns (None, False) and the caller shows a graceful note.
     """
     try:
-        from pythermalcomfort.models import wbgt as pt_wbgt
+        from pythermalcomfort.models import wbgt as pt_wbgt  # type: ignore[import-untyped]
 
         # with_solar_load=True selects the outdoor ISO 7243 formula
         # (0.7 Twb + 0.2 Tg + 0.1 Tdb). The default indoor form drops the

@@ -24,12 +24,24 @@ NIOSH_LIMITS = {
     "Very heavy": 25.0,
 }
 
+# Clothing adjustment values (C) from ISO 7243 Annex C.
+# Effective WBGT = measured WBGT + clothing adjustment: heavier / less
+# permeable clothing RAISES the effective heat strain, so the correction
+# is ADDED (equivalently, the safe threshold is lowered by the same
+# amount). Subtracting it would understate the risk and is wrong.
+CLOTHING_CORRECTION = {
+    "light_civilian": 0.0,
+    "coveralls": 1.0,
+    "construction_ppe": 2.0,
+    "impermeable_suit": 4.0,
+}
+
 
 def wet_bulb_stull(temp_c: float, humidity: float) -> float:
     """Wet bulb temperature in C, Stull (2011) empirical formula."""
     rh = max(5.0, min(99.9, float(humidity)))
     ta = float(temp_c)
-    return (
+    return float(
         ta * math.atan(0.151977 * math.sqrt(rh + 8.313659))
         + math.atan(ta + rh)
         - math.atan(rh - 1.676331)
@@ -43,19 +55,25 @@ def estimate_wbgt(
     humidity: float,
     solar_w_m2: float,
     wind_kmh: float = 10.0,
+    clothing: str = "light_civilian",
 ):
     """Outdoor WBGT estimate in C with convective wind adjustment on black globe.
 
     WBGT = 0.7 * wet bulb + 0.2 * black globe + 0.1 * dry bulb
     At the reference wind speed of 10 km/h, wind_factor == 1.0.
     Stagnant air (<10 km/h) increases radiant globe heating; higher wind cools the globe.
+
+    clothing: ISO 7243 Annex C clothing adjustment, added to the raw WBGT
+    (unknown values fall back to 0.0, i.e. light civilian clothing).
     """
     wet_bulb = wet_bulb_stull(temp_c, humidity)
     effective_wind_kmh = max(2.0, float(wind_kmh))
     wind_factor = (10.0 / effective_wind_kmh) ** 0.35
     solar_increment = min(18.0, max(0.0, float(solar_w_m2)) * 0.02 * wind_factor)
     black_globe = float(temp_c) + solar_increment
-    wbgt = 0.7 * wet_bulb + 0.2 * black_globe + 0.1 * float(temp_c)
+    wbgt_raw = 0.7 * wet_bulb + 0.2 * black_globe + 0.1 * float(temp_c)
+    correction = CLOTHING_CORRECTION.get(clothing, 0.0)
+    wbgt = wbgt_raw + correction
     return wbgt, wet_bulb, black_globe
 
 

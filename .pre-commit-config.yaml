@@ -1,0 +1,10 @@
+# Pre-commit hooks for ThermiGraph. Install with `pre-commit install`
+# (only on a machine with a git repo; this directory is not a git repo,
+# so hooks are NOT installed here).
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
