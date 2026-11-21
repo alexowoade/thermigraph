@@ -1,6 +1,6 @@
 # ThermiGraph AI — JavaScript Version
 
-**Live demo:** https://chipper-halva-04403d.netlify.app/
+**Live demo:** https://bright-quokka-334504.netlify.app/
 
 A plain HTML/CSS/JavaScript rebuild of the ThermiGraph dashboard. Same numbers,
 same sections, same design system as the Streamlit version (v6.3.13), but with
@@ -349,7 +349,7 @@ inputs, field note) — verified, no label added or needed.
 
 ### 4. OG image meta tags — tags added, image NOT created
 index.html head now has og:title, og:description, og:type, og:url,
-og:image `https://chipper-halva-04403d.netlify.app/og-image.png`,
+og:image `https://bright-quokka-334504.netlify.app/og-image.png`,
 twitter:card `summary_large_image`, twitter:title and
 twitter:description. NO og-image.png exists in this folder and none was
 faked: the file must be created before the preview works. To create it:
@@ -374,7 +374,7 @@ check.
 ### 6. Deploy — corrected instructions
 Deploy ONLY by dragging the unzipped `thermigraph-js-v17` folder onto
 the EXISTING site's deploys page:
-https://app.netlify.com/sites/chipper-halva-04403d/deploys
+https://app.netlify.com/sites/bright-quokka-334504/deploys
 Never use the Netlify Drop homepage (that creates a new site) and never
 use netlify-cli. One production deploy costs 15 Netlify credits: confirm
 the remaining quota before deploying (74.6 of 300 credits remained for
@@ -546,12 +546,12 @@ chrome to RTL, and at 375px wide there is no horizontal scroll.
   on Worker failure, no key in JS).
   Verified: see "Verify v14" below.
 
-## Deploy (existing Netlify site chipper-halva-04403d)
+## Deploy (existing Netlify site bright-quokka-334504)
 
 Do NOT use the Netlify Drop homepage — that creates a new site.
 Do NOT use netlify-cli. Drag the unzipped `thermigraph-js-v17` folder
 onto the existing site's deploys page ONLY:
-https://app.netlify.com/sites/chipper-halva-04403d/deploys
+https://app.netlify.com/sites/bright-quokka-334504/deploys
 One production deploy costs 15 Netlify credits. Confirm your
 remaining quota before deploying. After deploying, check the live
 site: the 3 zone cards load live, the strain chart shows full
@@ -607,7 +607,7 @@ If this JavaScript version has any problem, keep using the Streamlit link.
 - Theme colour #0f172a, display standalone, start_url ./index.html.
 - Service worker caches the app shell, network-first for Open-Meteo live weather, so the last live values show offline.
 - Install: on Android Chrome, menu > Install app / Add to Home screen. On iPhone Safari, Share > Add to Home Screen.
-- No app store, no native code, no account. Deploy is the same drag to the chipper-halva deploys page, 15 credits.
+- No app store, no native code, no account. Deploy is the same drag to the bright-quokka-334504 deploys page, 15 credits.
 - PWA was NOT click-tested in a real browser in this VM (headless Chrome blocked). Check install prompt on a real phone after deploy.
 
 ## v17 - PWA install fix (the one partial item in v16)
