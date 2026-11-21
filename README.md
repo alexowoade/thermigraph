@@ -28,8 +28,8 @@ Font stays 16px.
   (live Groq free text passes through unchanged).
 - Doubled word fixed: the rationale no longer reads "acclimatised
   acclimatisation"; it now reads "acclimatisation -0.0 C".
-- Service worker cache: thermigraph-v28.1. Public v27 link:
-  https://bright-quokka-334504.netlify.app/ (v28.1 not yet deployed).
+- Service worker cache: thermigraph-v28.7. Public live site (v28.2):
+  https://bright-quokka-334504.netlify.app/ (repo is v28.7).
 
 ## v28 (2026-11-19) — Final pre-deadline fix (JS only)
 
@@ -53,8 +53,8 @@ Built from v27. Final build before the 20 November deadline. Font stays
   Cloudflare Worker (not deterministic fallback), and Python v19
   coupled logic exists in workspace/thermigraph/ (GitHub sync is a
   separate push step).
-- Service worker cache: thermigraph-v28. Public v27 link:
-  https://bright-quokka-334504.netlify.app/ (v28 superseded by v28.1, neither deployed yet).
+- Service worker cache: thermigraph-v28.7. Public live site (v28.2):
+  https://bright-quokka-334504.netlify.app/ (repo is v28.7).
 
 ## v23 (2026-11-18) — Honest live vs forecast labelling (JS only)
 
