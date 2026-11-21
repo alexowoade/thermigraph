@@ -43,6 +43,19 @@
             <button id="refreshBtn" class="tg-btn" type="button" title="Reload the live Open-Meteo telemetry" aria-label="Refresh live data" data-i18n="refresh">🔄 Refresh live data</button>
         </div>
     </div>
+    <nav class="tg-subnav" aria-label="Dashboard sections">
+        <div class="tg-subnav-inner">
+            <a class="tg-nav-pill" href="#section1" data-i18n="navLiveMap">1. Live Map</a>
+            <a class="tg-nav-pill" href="#section2" data-i18n="navSimulator">2. Simulator</a>
+            <a class="tg-nav-pill" href="#section3" data-i18n="navStrain">3. 6-Day Strain</a>
+            <a class="tg-nav-pill" href="#section4" data-i18n="navShift">4. Shift Plan</a>
+            <a class="tg-nav-pill" href="#section5" data-i18n="navTriage">5. AI Triage</a>
+            <a class="tg-nav-pill" href="#section7" data-i18n="navGlobal">7. Global</a>
+            <a class="tg-nav-pill" href="#section8" data-i18n="navRoi">8. ROI</a>
+            <a class="tg-nav-pill" href="#section10" data-i18n="navWorker">10. Worker App</a>
+            <a class="tg-nav-pill" href="#section11" data-i18n="navEvidence">11. Evidence</a>
+        </div>
+    </nav>
 </div>
 
 <main class="tg-page">
@@ -66,9 +79,11 @@
     <!-- Section 1 -->
     <section class="tg-section tg-anim" data-anim="1" id="section1">
         <div class="tg-kicker" data-i18n="kicker1">Host Country Telemetry</div>
-        <h2 id="h-s1">1. Live WBGT Telemetry (Abu Dhabi Host Pilot Corridor)</h2>
+        <h2 id="h-s1" data-i18n="h2s1">1. Live WBGT Telemetry (Abu Dhabi Host Pilot Corridor)</h2>
+        <div class="tg-live-badge" role="status"><span class="tg-pulse"></span><span data-i18n="liveBadge">LIVE</span><span id="liveSource" class="tg-live-source"></span></div>
         <div class="tg-metric-grid" id="zoneCards"></div>
         <p class="tg-caption" id="liveCaption">Loading live readings…</p>
+        <p class="tg-caption" data-i18n="wbgtEstimate">WBGT estimate from live air temperature, humidity, solar and wind (Stull wet-bulb + wind-adjusted solar globe) — not a physical WBGT meter reading.</p>
         <div class="tg-map-wrap">
             <div id="mapContainer" class="tg-keep-ltr" role="img" data-i18n-aria="mapAria1" aria-label="Map of the Abu Dhabi pilot corridor showing live WBGT for Mussafah, KEZAD and Ruwais. One circle per zone: bigger means hotter, colour is the NIOSH status."></div>
             <div id="mapFallback" class="tg-map-fallback" hidden></div>
@@ -82,7 +97,7 @@
     <!-- Section 2 -->
     <section class="tg-section tg-anim" data-anim="2" id="section2">
         <div class="tg-kicker" data-i18n="kicker2">Global Sentinel Simulation</div>
-        <h2 id="h-s2">2. Global Worksite Selector &amp; Heat Spike Simulator</h2>
+        <h2 id="h-s2" data-i18n="h2s2">2. Global Worksite Selector &amp; Heat Spike Simulator</h2>
         <div class="tg-btn-row">
             <button id="btnLagos" class="tg-btn" type="button" title="One click to the most dramatic state: Lagos with a +6°C heat spike." aria-label="Show Lagos with a plus 6 degrees heat spike" data-i18n="lagosBtn">▶ Lagos +6°C demo</button>
             <button id="btnMussafah" class="tg-btn" type="button" title="Reset the worksite to Mussafah and the spike to +0°C." aria-label="Reset the worksite to Mussafah" data-i18n="mussafahBtn">↺ Back to Mussafah</button>
@@ -99,6 +114,9 @@
                 <input id="customLon" class="tg-input tg-keep-ltr" type="number" step="0.0001" min="-180" max="180" value="54.5038">
             </div>
         </div>
+        <div class="tg-control-deck">
+            <div class="tg-control-grid">
+                <div>
         <label class="tg-field-label" for="clothingSelect" data-i18n="clothingLabel">Clothing / PPE (ISO 7243 Annex C)</label>
         <select id="clothingSelect" class="tg-select" aria-label="Clothing and PPE, ISO 7243 Annex C clothing adjustment">
             <option value="light_civilian" data-i18n="clothingLight">Light civilian (+0 °C)</option>
@@ -106,6 +124,40 @@
             <option value="construction_ppe" data-i18n="clothingPPE">Construction PPE (+2 °C)</option>
             <option value="impermeable_suit" data-i18n="clothingSuit">Impermeable suit (+4 °C)</option>
         </select>
+                </div>
+                <div>
+        <label class="tg-field-label" for="workloadSelect" data-i18n="workloadLabel">Workload (NIOSH base limit)</label>
+        <select id="workloadSelect" class="tg-select" aria-label="Workload, NIOSH base limit">
+            <option value="Light" data-i18n="workloadLight">Light (30 °C)</option>
+            <option value="Moderate" data-i18n="workloadModerate">Moderate (28 °C)</option>
+            <option value="Heavy" selected data-i18n="workloadHeavy">Heavy (26 °C)</option>
+            <option value="Very heavy" data-i18n="workloadVeryHeavy">Very heavy (25 °C)</option>
+        </select>
+                </div>
+                <div>
+        <label class="tg-field-label" for="acclimSelect" data-i18n="acclimLabel">Acclimatisation (lowers the effective limit)</label>
+        <select id="acclimSelect" class="tg-select" aria-label="Acclimatisation, lowers the effective limit">
+            <option value="acclimatised" selected data-i18n="acclimAcclimatised">Acclimatised (−0.0 °C)</option>
+            <option value="partial" data-i18n="acclimPartial">Partially acclimatised (−1.5 °C)</option>
+            <option value="unacclimatised" data-i18n="acclimUnacclimatised">Unacclimatised (−2.5 °C)</option>
+        </select>
+                </div>
+                <div>
+        <label class="tg-field-label" for="exposureSelect" data-i18n="exposureLabel">Sun exposure (globe temperature)</label>
+        <select id="exposureSelect" class="tg-select" aria-label="Sun exposure, globe temperature">
+            <option value="open_sun" selected data-i18n="exposureOpenSun">Open sun</option>
+            <option value="high_albedo" data-i18n="exposureHighAlbedo">High albedo (bright concrete / sand, globe +1.5 °C)</option>
+            <option value="shaded" data-i18n="exposureShaded">Shaded (globe = air temperature)</option>
+        </select>
+                </div>
+            </div>
+            <div id="effectiveLimitBanner" class="tg-eff-banner tg-keep-ltr"></div>
+        </div>
+        <div class="tg-btn-row">
+            <button id="btnLiveGps" class="tg-btn" type="button" title="Use the device GPS as the active worksite" aria-label="Use my live worksite GPS" data-i18n="gpsBtn">📍 Use My Live Worksite GPS</button>
+            <button id="btnAutoPoll" class="tg-btn" type="button" title="Reload live telemetry every 60 seconds" aria-label="Toggle live auto-poll every 60 seconds" data-i18n="autoPollOn">🔴 Live Auto-Poll (60s): ON</button>
+            <span id="telemetryHeartbeat" class="tg-keep-ltr" aria-live="polite"></span>
+        </div>
         <label class="tg-field-label" for="spikeSlider" data-i18n-html="spikeLabel">Simulate Extreme Heatwave Anomaly (+°C added to live telemetry)</label>
         <div class="tg-slider-row">
             <input id="spikeSlider" type="range" min="0" max="10" step="1" value="0" class="tg-slider">
@@ -114,7 +166,7 @@
         <div class="tg-split">
             <div class="tg-metric tg-keep-ltr" id="spikedMetric"></div>
             <div class="tg-glass-card tg-keep-ltr">
-                <div class="tg-kicker" data-i18n="nioshTitle">NIOSH Work-Intensity Limits (Acclimatised, Continuous Work)</div>
+                <div class="tg-kicker" id="nioshTitleEl">NIOSH Work-Intensity Limits (Acclimatised, Continuous Work)</div>
                 <div class="tg-niosh-grid tg-keep-ltr" id="nioshChips"></div>
             </div>
         </div>
@@ -127,7 +179,12 @@
     <!-- Section 3 -->
     <section class="tg-section tg-anim" data-anim="3" id="section3">
         <div class="tg-kicker" data-i18n="kicker3">Multi-Day Physiological Debt</div>
-        <h2 id="h-s3">3. Cumulative Strain Over 6 Days &amp; Nocturnal Recovery Debt</h2>
+        <h2 id="h-s3" data-i18n="h2s3">3. Cumulative Strain Over 6 Days &amp; Nocturnal Recovery Debt</h2>
+        <div class="tg-legend" aria-label="Observed versus forecast">
+            <span class="tg-legend-chip tg-legend-observed"><span class="tg-legend-dot"></span><span data-i18n="strainObserved">Observed</span></span>
+            <span class="tg-legend-chip tg-legend-forecast"><span class="tg-legend-dot"></span><span data-i18n="strainForecast">Forecast</span></span>
+        </div>
+        <p class="tg-caption" data-i18n="strainLegend">Past 3 days + today so far: Observed (live Open-Meteo). Next 2 days: Forecast. Today mixes observed hours so far with forecast hours later today.</p>
         <div id="strainChart" class="tg-chart tg-keep-ltr" role="img" data-i18n-aria="chartAria" aria-label="Chart of cumulative thermal strain over 6 days, with the red line at 12 points"></div>
         <div class="tg-table-wrap tg-keep-ltr" id="strainTableWrap"></div>
         <div id="strainBanner" class="tg-alert" hidden></div>
@@ -156,7 +213,8 @@
     <!-- Section 4 -->
     <section class="tg-section tg-anim" data-anim="4" id="section4">
         <div class="tg-kicker" data-i18n="kicker4">Dynamic Crew Rotation</div>
-        <h2 id="h-s4">4. Automated Shift &amp; Work-Rest Optimizer</h2>
+        <h2 id="h-s4" data-i18n="h2s4">4. Automated Shift &amp; Work-Rest Optimizer</h2>
+        <p class="tg-body" data-i18n="shiftCaption">Proactive plan — based on live WBGT now plus forecast hours</p>
         <div class="tg-metric-grid tg-metric-grid-3">
             <div class="tg-metric" id="kpiPrevented"></div>
             <div class="tg-metric" id="kpiCooling"></div>
@@ -178,7 +236,7 @@
     <!-- Section 5 -->
     <section class="tg-section tg-anim" data-anim="5" id="section5">
         <div class="tg-kicker" data-i18n="kicker5">Structured Clinical Extraction</div>
-        <h2 id="h-s5">5. AI Field-Log Triage &amp; Multilingual Crew Dispatch (Privacy-Preserving)</h2>
+        <h2 id="h-s5" data-i18n="h2s5">5. AI Field-Log Triage &amp; Multilingual Crew Dispatch (Privacy-Preserving)</h2>
         <label class="tg-field-label" for="caseSelect" data-i18n="caseLabel">Select Clinical Field Scenario Preset (or customize note below)</label>
         <select id="caseSelect" class="tg-select"></select>
         <label class="tg-field-label" for="noteInput" data-i18n="noteLabel">Supervisor field note (EN/AR/HI — worker names auto-redacted)</label>
@@ -194,7 +252,7 @@
     <!-- Section 6 -->
     <section class="tg-section tg-anim" data-anim="6" id="section6">
         <div class="tg-kicker" data-i18n="kicker6">Audit &amp; Governance Trail</div>
-        <h2 id="h-s6">6. Exportable Compliance &amp; Triage Report</h2>
+        <h2 id="h-s6" data-i18n="h2s6">6. Exportable Compliance &amp; Triage Report</h2>
         <p class="tg-body" data-i18n="s6body">Download the full compliance report: live zone telemetry, the active worksite and spike, the 6-day strain index, the shift plan, the latest anonymised triage, and the scope disclosures.</p>
         <button id="btnReport" class="tg-btn tg-btn-large" type="button" aria-label="Download compliance report as text file" data-i18n="reportBtn">⬇️ Download compliance report (.txt)</button>
     </section>
@@ -204,7 +262,7 @@
     <!-- Section 7 -->
     <section class="tg-section tg-anim" data-anim="7" id="section7">
         <div class="tg-kicker" data-i18n="kicker7">Cross-Continental Benchmarking</div>
-        <h2 id="h-s7">7. Global Compare-Sites View</h2>
+        <h2 id="h-s7" data-i18n="h2s7">7. Global Compare-Sites View</h2>
         <p class="tg-body" data-i18n="s7body">One table, four sentinel corridors, same physics and thresholds. This is the argument that ThermiGraph is global.</p>
         <div id="compareMapContainer" class="tg-keep-ltr" role="img" data-i18n-aria="mapAria2" aria-label="World map showing live WBGT for the four sentinel corridors: Mussafah, Lagos, Delhi and Houston. One circle per site: bigger means hotter, colour is the NIOSH status."></div>
         <div class="tg-table-wrap tg-keep-ltr" id="compareTableWrap"></div>
@@ -216,7 +274,7 @@
     <!-- Section 8 -->
     <section class="tg-section tg-anim" data-anim="8" id="section8">
         <div class="tg-kicker" data-i18n="kicker8">Health System &amp; Employer Economics</div>
-        <h2 id="h-s8">8. Impact / ROI Panel (Pilot Scale)</h2>
+        <h2 id="h-s8" data-i18n="h2s8">8. Impact / ROI Panel (Pilot Scale)</h2>
         <p class="tg-body" data-i18n="s8body">Pilot-scale estimates for the Abu Dhabi host corridor. All figures are planning estimates, clearly labelled.</p>
         <div class="tg-metric-grid tg-metric-grid-4">
             <div class="tg-metric"><div class="tg-metric-label" data-i18n="roi1label">Workers currently protected</div><div class="tg-metric-value" data-count="4500">4,500</div><div class="tg-metric-delta" data-i18n="roi1delta">3 zones × 1,500 per zone (est.)</div></div>
@@ -232,7 +290,7 @@
     <!-- Section 9 -->
     <section class="tg-section tg-anim" data-anim="9" id="section9">
         <div class="tg-kicker" data-i18n="kicker9">Interactive Actuarial Model</div>
-        <h2 id="h-s9">9. Cost-of-Inaction Calculator</h2>
+        <h2 id="h-s9" data-i18n="h2s9">9. Cost-of-Inaction Calculator</h2>
         <div class="tg-form-grid">
             <div>
                 <label class="tg-field-label" for="coWorkers" data-i18n="coWorkersLabel">Exposed workers</label>
@@ -256,7 +314,7 @@
     <!-- Section 10 -->
     <section class="tg-section tg-anim" data-anim="10" id="section10">
         <div class="tg-kicker" data-i18n="kicker10">Last-Mile Field Equity</div>
-        <h2 id="h-s10">10. Worker-Facing View</h2>
+        <h2 id="h-s10" data-i18n="h2s10">10. Worker-Facing View</h2>
         <p class="tg-body" data-i18n="s10body">The same data, stripped for the worker holding the phone. One number, one action, one promise.</p>
         <div class="tg-kicker" data-i18n="kickerDemo">Live Demo Control</div>
         <label class="tg-field-label" for="demoSlider" data-i18n="demoLabel">🎬 Demo slider — drag to watch the phone react</label>
@@ -281,20 +339,20 @@
          Clinical Evidence, validation or references section on the site) -->
     <section class="tg-section tg-anim tg-evidence" data-anim="11" id="section11">
         <div class="tg-kicker" data-i18n="kicker11">Evidence &amp; Limits</div>
-        <h2 id="h-s11">11. Clinical Evidence &amp; Validation</h2>
+        <h2 id="h-s11" data-i18n="h2s11">11. Clinical Evidence &amp; Validation</h2>
         <p class="tg-body" data-i18n="s11intro">ThermiGraph is a prototype. This section states what the science supports, what the code has been tested for, and what is not proven. No expert quote, clinician name, or real pilot is claimed here.</p>
 
         <h3 data-i18n="s11hFormula">WBGT formula</h3>
         <p class="tg-body" data-i18n-html="s11formula">Outdoors, in direct sun: WBGT = 0.7 × natural wet bulb + 0.2 × black globe + 0.1 × dry bulb. In shade or indoors: WBGT = 0.7 × natural wet bulb + 0.3 × black globe. ThermiGraph uses the outdoor weighting, with wet bulb by the Stull formula and black globe estimated from solar radiation. That is a prototype simplification of the Liljegren model below, not a calibrated meter reading.</p>
 
         <h3 data-i18n="s11hNiosh">NIOSH work limits</h3>
-        <p class="tg-body" data-i18n-html="s11niosh">Recommended Exposure Limits, acclimatised workers, continuous work: Light 30 °C, Moderate 28 °C, Heavy 26 °C, Very heavy 25 °C. Unacclimatised workers are 2–3 °C lower. Above the limit, NIOSH prescribes work/rest scheduling: 45 work / 15 rest, then 30 / 30, then 15 / 45, then stop. ThermiGraph uses the acclimatised limits and the 45/15 and 30/30 steps.</p>
+        <p class="tg-body" data-i18n-html="s11niosh">Recommended Exposure Limits, acclimatised workers, continuous work: Light 30 °C, Moderate 28 °C, Heavy 26 °C, Very heavy 25 °C. Unacclimatised workers are 2–3 °C lower. Above the limit, NIOSH prescribes work/rest scheduling: 45 work / 15 rest, then 30 / 30, then 15 / 45, then stop. Since v22 ThermiGraph uses the effective limit, not the acclimatised limit: base NIOSH limit minus the acclimatisation penalty (0 / 1.5 / 2.5 °C) and the multi-day debt penalty (0.5 / 1.0 °C).</p>
 
         <h3 data-i18n="s11hMulti">Multi-day strain and kidney injury</h3>
         <p class="tg-body" data-i18n-html="s11multi">The ThermiGraph claim is that heat stroke and acute kidney injury come from multi-day cumulative strain, not a single hot afternoon. In the Florida farmworker study below, over half of workers started the day dehydrated, 81% were dehydrated after a day of work, and one third had acute kidney injury at least once during three summer workdays. The odds of acute kidney injury rose 47% for each 5-degree increase in heat index, and kidney injury prevalence rose from 21% to 43% over three years in fernery workers. That supports tracking strain over 6 days and flagging failed overnight recovery when the night minimum stays above 28 °C.</p>
 
-        <h3 data-i18n-html="s11hValid">Validation tests: 8 / 8 passed</h3>
-        <p class="tg-body" data-i18n="s11validIntro">Validation tests passed in the 2026-11-16 check, run with no network, no Gemini, and no patient data:</p>
+        <h3 data-i18n-html="s11hValid">Validation tests: 9 / 9 passed</h3>
+        <p class="tg-body" data-i18n="s11validIntro">Validation tests passed in the 2026-11-21 check, run with no network, no Groq, and no patient data:</p>
         <ul>
             <li data-i18n-html="s11v1">Stull wet bulb: 29.1 °C, 43% RH gives a wet bulb of 20.3 °C.</li>
             <li data-i18n-html="s11v2">WBGT formula: 0.7 / 0.2 / 0.1 weighting on fixed wet bulb, globe and dry bulb inputs.</li>
@@ -304,13 +362,14 @@
             <li data-i18n-html="s11v6">Daily strain points: 1 point at 25.4 °C, 3 points above 28 °C, plus 1 point for recovery debt.</li>
             <li data-i18n-html="s11v7">Recovery debt: night minimum above 28 °C flags yes, at or below 28 °C flags no.</li>
             <li data-i18n="s11v8">Triage model: the sample note returns Critical, with vomiting and stopped sweating in the symptoms.</li>
+            <li data-i18n-html="s11v9">Psychrometric table agreement: Stull wet bulb matches the published ASHRAE table within 0.7 °C across 10 points at 35 °C, 10–100% RH, largest deviation 0.64 °C.</li>
         </ul>
 
         <h3 data-i18n="s11hLimits">Limitations, in plain words</h3>
         <ul>
             <li data-i18n="s11l1">WBGT is estimated from weather data, not measured with a globe meter.</li>
             <li data-i18n="s11l2">Globe temperature is estimated from solar radiation, not measured.</li>
-            <li data-i18n-html="s11l3">Clothing correction (ISO 7243 Annex C, +0 / +1 / +2 / +4 °C) IS applied via the Clothing / PPE selector in Section 2. Acclimatisation, age, and medical history are still not modelled.</li>
+            <li data-i18n-html="s11l3">Clothing correction (ISO 7243 Annex C, +0 / +1 / +2 / +4 °C) IS applied via the Clothing / PPE selector in Section 2. Acclimatisation IS now modelled via the Section 2 selector (effective limit, v22). Age and medical history are still not modelled.</li>
             <li data-i18n="s11l4">The cumulative score of 12 is a prototype score, not a clinical threshold.</li>
             <li data-i18n="s11l5">Triage is structured extraction from a typed note, not a medical diagnosis.</li>
             <li data-i18n="s11l6">No real crew, no real shift, and no real meter reading are claimed.</li>

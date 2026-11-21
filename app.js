@@ -101,10 +101,41 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         kicker7: "Cross-Continental Benchmarking",
         kicker8: "Health System & Employer Economics",
         kicker9: "Interactive Actuarial Model",
+        h2s1: "1. Live WBGT Telemetry (Abu Dhabi Host Pilot Corridor)",
+        h2s2: "2. Global Worksite Selector & Heat Spike Simulator",
+        h2s3: "3. Cumulative Strain Over 6 Days & Nocturnal Recovery Debt",
+        h2s4: "4. Automated Shift & Work-Rest Optimizer",
+        h2s5: "5. AI Field-Log Triage & Multilingual Crew Dispatch (Privacy-Preserving)",
+        h2s6: "6. Exportable Compliance & Triage Report",
+        h2s7: "7. Global Compare-Sites View",
+        h2s8: "8. Impact / ROI Panel (Pilot Scale)",
+        h2s9: "9. Cost-of-Inaction Calculator",
+        h2s10: "10. Worker-Facing View",
+        h2s11: "11. Clinical Evidence & Validation",
         kicker10: "Last-Mile Field Equity",
         kickerDemo: "Live Demo Control",
         kicker11: "Evidence & Limits",
         clothingLabel: "Clothing / PPE (ISO 7243 Annex C)",
+        workloadLabel: "Workload (NIOSH base limit)",
+        workloadLight: "Light (30 °C)",
+        workloadModerate: "Moderate (28 °C)",
+        workloadHeavy: "Heavy (26 °C)",
+        workloadVeryHeavy: "Very heavy (25 °C)",
+        acclimLabel: "Acclimatisation (lowers the effective limit)",
+        acclimAcclimatised: "Acclimatised (−0.0 °C)",
+        acclimPartial: "Partially acclimatised (−1.5 °C)",
+        acclimUnacclimatised: "Unacclimatised (−2.5 °C)",
+        exposureLabel: "Sun exposure (globe temperature)",
+        exposureOpenSun: "Open sun",
+        exposureHighAlbedo: "High albedo (bright concrete / sand, globe +1.5 °C)",
+        exposureShaded: "Shaded (globe = air temperature)",
+        gpsBtn: "📍 Use My Live Worksite GPS",
+        autoPollOn: "🔴 Live Auto-Poll (60s): ON",
+        autoPollOff: "⚪ Live Auto-Poll (60s): OFF",
+        gpsFailed: "Live GPS failed: {msg} — keeping the current worksite.",
+        gpsUnsupported: "Live GPS is not supported by this browser — keeping the current worksite.",
+        gpsOk: "Live GPS worksite set: {lat}, {lon}.",
+        telemetryLive: "Live Open-Meteo stream ({ms} ms RTT, {time} UTC)",
         lagosBtn: "▶ Lagos +6°C demo",
         mussafahBtn: "↺ Back to Mussafah",
         triageBtn: "🚀 Run triage",
@@ -143,6 +174,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         customLon: "Custom Longitude",
         spikeLabel: "Simulate Extreme Heatwave Anomaly (<span class=\"tg-keep-ltr\">+°C</span> added to live telemetry)",
         nioshTitle: "NIOSH Work-Intensity Limits (Acclimatised, Continuous Work)",
+        nioshTitleAccl: "NIOSH Work-Intensity Limits (Acclimatised, Continuous Work)",
+        nioshTitleUnaccl: "NIOSH Work-Intensity Limits (Unacclimatised, Continuous Work)",
         isoCaption: "WBGT follows the ISO 7243 weighting (<span class=\"tg-keep-ltr\">0.7 wet bulb + 0.2 globe + 0.1 dry bulb</span>).",
         s3cap: "Cumulative Thermal Strain Index is an explainable prototype risk score (<span class=\"tg-keep-ltr\">0–4</span> points/day from peak WBGT + Nocturnal Recovery Debt <span class=\"tg-keep-ltr\">>28°C</span>), not a clinical diagnosis.",
         daySliderLabel: "📅 Drag through the 6 days — watch the strain build",
@@ -174,39 +207,67 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         zoneWbgtLabel: "{zone} WBGT Estimate",
         zoneDelta: "Air: {air}°C | RH: {rh}% | Wind: {wind} km/h",
         liveCaption: "Live readings as of {time} (local site time, Open-Meteo).",
+        liveBadge: "LIVE",
+        liveSource: "Source: Open-Meteo · Updated every 60s · As of {time}",
+        wbgtEstimate: "WBGT estimate from live air temperature, humidity, solar and wind (Stull wet-bulb + wind-adjusted solar globe) — not a physical WBGT meter reading.",
         spikedLabel: "{site} WBGT (with spike)",
-        alertCritical: "CRITICAL: Spiked WBGT exceeds the 28.0 °C Moderate limit. Heavy and moderate continuous outdoor work must stop.",
-        alertHigh: "HIGH STRAIN: Spiked WBGT exceeds the 26.0 °C Heavy work limit. Strict work-rest micro-rotations required.",
+        // v28.1: the alert texts now name the EFFECTIVE limit that
+        // triggers them (the alert already fired on it),
+        // not the hardcoded 28.0 / 26.0 NIOSH base limits.
+        alertCritical: "CRITICAL: Spiked WBGT exceeds the {limit} °C effective {workload} limit by more than 2.5 °C. Heavy and moderate continuous outdoor work must stop.",
+        alertHigh: "HIGH STRAIN: Spiked WBGT exceeds the {limit} °C effective {workload} limit. Strict work-rest micro-rotations required.",
+        // v28.1: effective-limit rationale + shift explanations as
+        // templates, so Arabic can render them (they were English-only
+        // strings built in logic.js). The English templates reproduce
+        // the logic.js strings byte for byte.
+        effRationale: "Effective {workload} limit {eff} C = NIOSH base {base} C - {pen} C (acclimatisation -{acclimPen} C; {debt} -{debtPen} C)",
+        effDebtRedline: "cumulative strain {n} >= 12 (red line crossed)",
+        effDebtMultiday: "multi-day debt: {days} nocturnal debt day(s), cumulative strain {n}",
+        effDebtNone: "no multi-day debt penalty",
+        shiftExpShade: "SHADE BREAK 13-15 — mandatory shaded rest 13:00-15:00, the hottest window, regardless of WBGT",
+        shiftExpHalt: "PROACTIVE HALT — WBGT {wbgt} C is above the effective {workload} limit {eff} C ({rationale}); no outdoor work",
+        shiftExpPacing: "PROACTIVE 30/30 PACING — WBGT {wbgt} C is above the effective {workload} limit {eff} C; 30 min work / 30 min shaded rest",
+        shiftExpBuffer: "PRE-THRESHOLD BUFFER — WBGT {wbgt} C is within 1 C of the effective {workload} limit {eff} C; 45 min work / 15 min shaded rest",
+        shiftExpSafe: "Safe continuous window — WBGT {wbgt} C is below the effective {workload} limit {eff} C; continuous work",
         chartTitle: "Hourly WBGT estimate, 6-day window",
-        chartHeavy: "Heavy limit 26 °C",
+        chartHeavy: "Heavy limit {limit} °C",
         chartModerate: "Moderate limit 28 °C",
         chartUnavailable: "Strain chart unavailable (chart library did not load). The table below has the same 6-day data.",
         strainThDate: "Date",
         strainThMaxTemp: "Max Temp (°C)",
         strainThNightMin: "Night Min (°C)",
         strainThMaxWbgt: "Max WBGT Est. (°C)",
-        strainThHoursOver: "Hours > Heavy Limit (26°C)",
+        strainThHoursOver: "Hours > Heavy Limit ({limit}°C)",
         strainThDebt: "Nocturnal Recovery Debt (>28°C)",
         strainThPoints: "Daily Strain Points",
         strainThCumulative: "Cumulative Strain Index",
+        strainThSource: "Source",
+        strainObserved: "Observed",
+        strainForecast: "Forecast",
+        strainLegend: "Past 3 days + today so far: Observed (live Open-Meteo). Next 2 days: Forecast. Today mixes observed hours so far with forecast hours later today.",
         strainRed: "RED LINE CROSSED: 6-Day Cumulative Thermal Strain Index is {total} (Threshold: 12). Multi-day thermal debt and failed overnight cooling indicate high risk of acute heat exhaustion and renal strain.",
         strainBelow: "6-Day Cumulative Thermal Strain Index: {total} / 12 (Below red-line collapse threshold at +{spike}°C spike). Increase the Heat Spike Simulator slider to observe multi-day thermal debt accumulation.",
         dayReadout: "Day {day} ({date}): max WBGT {wbgt} °C, night min {night} °C, {points} strain points, cumulative {cum} / 12",
         dayReadoutRed: " — RED LINE CROSSED",
         dayReadoutHint: "Drag the slider to step through each day.",
         kpiPreventedLabel: "Unsafe Heavy-Work Hours Prevented",
-        kpiPreventedDelta: "Hours > 26.0 °C WBGT auto-restricted",
+        kpiPreventedDelta: "Hours > {limit} °C WBGT auto-restricted",
         kpiCoolingLabel: "Mandatory Cooling & Shade",
         kpiCoolingDelta: "{h} hrs total recovery time",
         kpiDebtLabel: "Active Nocturnal Debt Days (>28°C)",
         kpiDebtDelta: "Overnight recovery failure flag",
+        shiftCaption: "Proactive plan — based on live WBGT now plus forecast hours",
         shiftIntro: "Projected Schedule for <code>{tomorrow}</code> (at +{spike}°C spike): Heavy labour restricted to <code>06:00–10:00</code>. Crews anonymised (<code>Crew A</code>, <code>Crew B</code>).",
         shiftThHour: "Hour",
         shiftThTemp: "Projected Temp (°C)",
         shiftThWbgt: "Projected WBGT (°C)",
         shiftThRatio: "Work / Rest Ratio",
         shiftThCrew: "Anonymised Crew Assignment",
-        baPreventedDelta: "Hours > 26.0 °C WBGT auto-restricted · {pct}% of schedule applied",
+        shiftThHydration: "Hydration Protocol",
+        shiftThExplanation: "Explainable Schedule Adjustment",
+        triageHydrationProtocol: "Hydration Protocol (coupled)",
+        triageCorrelation: "Explainable Correlation",
+        baPreventedDelta: "Hours > {limit} °C WBGT auto-restricted · {pct}% of schedule applied",
         baCoolingDelta: "{h} hrs total recovery time · {pct}% of schedule applied",
         triageEngine: "Active Triage Engine: {engine}",
         triageWorker: "Worker (Anonymised)",
@@ -220,6 +281,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         triageHiBroadcast: "Hindi/Urdu Crew Broadcast",
         compareThSite: "Site",
         compareThCurrent: "Current WBGT (°C)",
+        compareThSolar: "Solar (W/m²)",
         compareThMax: "6-Day Max WBGT (°C)",
         compareThDebt: "Debt Days",
         compareThTier: "Risk Tier",
@@ -272,11 +334,11 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         s11hFormula: "WBGT formula",
         s11formula: "Outdoors, in direct sun: WBGT = <span class=\"tg-keep-ltr\">0.7 × natural wet bulb + 0.2 × black globe + 0.1 × dry bulb</span>. In shade or indoors: WBGT = <span class=\"tg-keep-ltr\">0.7 × natural wet bulb + 0.3 × black globe</span>. ThermiGraph uses the outdoor weighting, with wet bulb by the Stull formula and black globe estimated from solar radiation. That is a prototype simplification of the Liljegren model below, not a calibrated meter reading.",
         s11hNiosh: "NIOSH work limits",
-        s11niosh: "Recommended Exposure Limits, acclimatised workers, continuous work: Light <span class=\"tg-keep-ltr\">30 °C</span>, Moderate <span class=\"tg-keep-ltr\">28 °C</span>, Heavy <span class=\"tg-keep-ltr\">26 °C</span>, Very heavy <span class=\"tg-keep-ltr\">25 °C</span>. Unacclimatised workers are <span class=\"tg-keep-ltr\">2–3 °C</span> lower. Above the limit, NIOSH prescribes work/rest scheduling: <span class=\"tg-keep-ltr\">45 work / 15 rest</span>, then <span class=\"tg-keep-ltr\">30 / 30</span>, then <span class=\"tg-keep-ltr\">15 / 45</span>, then stop. ThermiGraph uses the acclimatised limits and the <span class=\"tg-keep-ltr\">45/15</span> and <span class=\"tg-keep-ltr\">30/30</span> steps.",
+        s11niosh: "Recommended Exposure Limits, acclimatised workers, continuous work: Light <span class=\"tg-keep-ltr\">30 °C</span>, Moderate <span class=\"tg-keep-ltr\">28 °C</span>, Heavy <span class=\"tg-keep-ltr\">26 °C</span>, Very heavy <span class=\"tg-keep-ltr\">25 °C</span>. Unacclimatised workers are <span class=\"tg-keep-ltr\">2–3 °C</span> lower. Above the limit, NIOSH prescribes work/rest scheduling: <span class=\"tg-keep-ltr\">45 work / 15 rest</span>, then <span class=\"tg-keep-ltr\">30 / 30</span>, then <span class=\"tg-keep-ltr\">15 / 45</span>, then stop. Since v22 ThermiGraph uses the effective limit, not the acclimatised limit: base NIOSH limit minus the acclimatisation penalty (<span class=\"tg-keep-ltr\">0 / 1.5 / 2.5 °C</span>) and the multi-day debt penalty (<span class=\"tg-keep-ltr\">0.5 / 1.0 °C</span>).",
         s11hMulti: "Multi-day strain and kidney injury",
         s11multi: "The ThermiGraph claim is that heat stroke and acute kidney injury come from multi-day cumulative strain, not a single hot afternoon. In the Florida farmworker study below, over half of workers started the day dehydrated, <span class=\"tg-keep-ltr\">81%</span> were dehydrated after a day of work, and one third had acute kidney injury at least once during three summer workdays. The odds of acute kidney injury rose <span class=\"tg-keep-ltr\">47%</span> for each <span class=\"tg-keep-ltr\">5-degree</span> increase in heat index, and kidney injury prevalence rose from <span class=\"tg-keep-ltr\">21%</span> to <span class=\"tg-keep-ltr\">43%</span> over three years in fernery workers. That supports tracking strain over 6 days and flagging failed overnight recovery when the night minimum stays above <span class=\"tg-keep-ltr\">28 °C</span>.",
-        s11hValid: "Validation tests: <span class=\"tg-keep-ltr\">8 / 8</span> passed",
-        s11validIntro: "Validation tests passed in the 2026-11-16 check, run with no network, no Gemini, and no patient data:",
+        s11hValid: "Validation tests: <span class=\"tg-keep-ltr\">9 / 9</span> passed",
+        s11validIntro: "Validation tests passed in the 2026-11-21 check, run with no network, no Groq, and no patient data:",
         s11v1: "Stull wet bulb: <span class=\"tg-keep-ltr\">29.1 °C, 43% RH</span> gives a wet bulb of <span class=\"tg-keep-ltr\">20.3 °C</span>.",
         s11v2: "WBGT formula: <span class=\"tg-keep-ltr\">0.7 / 0.2 / 0.1</span> weighting on fixed wet bulb, globe and dry bulb inputs.",
         s11v3: "Live Mussafah WBGT estimate: <span class=\"tg-keep-ltr\">25.4 °C</span> at <span class=\"tg-keep-ltr\">29.1 °C, 43% RH, 631 W/m²</span> solar.",
@@ -285,15 +347,27 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         s11v6: "Daily strain points: <span class=\"tg-keep-ltr\">1 point</span> at <span class=\"tg-keep-ltr\">25.4 °C</span>, <span class=\"tg-keep-ltr\">3 points</span> above <span class=\"tg-keep-ltr\">28 °C</span>, plus <span class=\"tg-keep-ltr\">1 point</span> for recovery debt.",
         s11v7: "Recovery debt: night minimum above <span class=\"tg-keep-ltr\">28 °C</span> flags yes, at or below <span class=\"tg-keep-ltr\">28 °C</span> flags no.",
         s11v8: "Triage model: the sample note returns Critical, with vomiting and stopped sweating in the symptoms.",
+        s11v9: "Psychrometric table agreement: Stull wet bulb matches the published ASHRAE table within <span class=\"tg-keep-ltr\">0.7 °C</span> across <span class=\"tg-keep-ltr\">10 points</span> at <span class=\"tg-keep-ltr\">35 °C, 10–100% RH</span>, largest deviation <span class=\"tg-keep-ltr\">0.64 °C</span>.",
         s11hLimits: "Limitations, in plain words",
         s11l1: "WBGT is estimated from weather data, not measured with a globe meter.",
         s11l2: "Globe temperature is estimated from solar radiation, not measured.",
-        s11l3: "Clothing correction (ISO 7243 Annex C, <span class=\"tg-keep-ltr\">+0 / +1 / +2 / +4 °C</span>) IS applied via the Clothing / PPE selector in Section 2. Acclimatisation, age, and medical history are still not modelled.",
+        s11l3: "Clothing correction (ISO 7243 Annex C, <span class=\"tg-keep-ltr\">+0 / +1 / +2 / +4 °C</span>) IS applied via the Clothing / PPE selector in Section 2. Acclimatisation IS now modelled via the Section 2 selector (effective limit, v22). Age and medical history are still not modelled.",
         s11l4: "The cumulative score of 12 is a prototype score, not a clinical threshold.",
         s11l5: "Triage is structured extraction from a typed note, not a medical diagnosis.",
         s11l6: "No real crew, no real shift, and no real meter reading are claimed.",
         s11expert: "Expert review: none yet. No clinician has reviewed this prototype. That section will only be filled by a real reviewer, with name, qualification, organisation and date, and only with their consent.",
         s11hRefs: "References",
+        navLiveMap: "1. Live Map",
+        navSimulator: "2. Simulator",
+        navStrain: "3. 6-Day Strain",
+        navShift: "4. Shift Plan",
+        navTriage: "5. AI Triage",
+        navGlobal: "7. Global",
+        navRoi: "8. ROI",
+        navWorker: "10. Worker App",
+        navEvidence: "11. Evidence",
+        triageLoading: "⚡ Live Groq AI analyzing telemetry & 6-day debt…",
+        effBannerLabel: "Effective limit",
     };
     const AR = {
         title: "ثرميغراف — محرك الإجهاد الحراري",
@@ -318,8 +392,39 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         kicker9: "نموذج اكتواري تفاعلي",
         kicker10: "العدالة الميدانية للعامل",
         kickerDemo: "التحكم في العرض التجريبي المباشر",
+        h2s1: "1. قياسات WBGT المباشرة (ممر أبوظبي التجريبي المضيف)",
+        h2s2: "2. محدد موقع العمل العالمي ومحاكي موجة الحر",
+        h2s3: "3. الإجهاد التراكمي على مدى 6 أيام ودين الاسترداد الليلي",
+        h2s4: "4. مُحسِّن الورديات والراحة الآلي",
+        h2s5: "5. فرز سجلات الميدان بالذكاء الاصطناعي والإرسال متعدد اللغات للطاقم (يحافظ على الخصوصية)",
+        h2s6: "6. تقرير الامتثال والفرز القابل للتصدير",
+        h2s7: "7. عرض المقارنة العالمية بين المواقع",
+        h2s8: "8. لوحة الأثر والعائد على الاستثمار (على نطاق تجريبي)",
+        h2s9: "9. حاسبة كلفة التقاعس",
+        h2s10: "10. عرض العامل",
+        h2s11: "11. الأدلة السريرية والتحقق",
         kicker11: "الأدلة والحدود",
         clothingLabel: "الملابس / معدات الوقاية (ISO 7243 الملحق ج)",
+        workloadLabel: "شدة العمل (الحد الأساسي لـ NIOSH)",
+        workloadLight: "خفيف (30 °C)",
+        workloadModerate: "متوسط (28 °C)",
+        workloadHeavy: "شاق (26 °C)",
+        workloadVeryHeavy: "شاق جداً (25 °C)",
+        acclimLabel: "التأقلم (يخفض الحد الفعال)",
+        acclimAcclimatised: "متأقلم (−0.0 °C)",
+        acclimPartial: "متأقلم جزئياً (−1.5 °C)",
+        acclimUnacclimatised: "غير متأقلم (−2.5 °C)",
+        exposureLabel: "التعرض للشمس (درجة حرارة الكرة السوداء)",
+        exposureOpenSun: "شمس مفتوحة",
+        exposureHighAlbedo: "انعكاس عالٍ (خرسانة / رمل ساطع، الكرة +1.5 °C)",
+        exposureShaded: "مظلل (الكرة = درجة حرارة الهواء)",
+        gpsBtn: "📍 استخدام GPS موقع العمل المباشر",
+        autoPollOn: "🔴 التحديث التلقائي المباشر (60 ث): يعمل",
+        autoPollOff: "⚪ التحديث التلقائي المباشر (60 ث): متوقف",
+        gpsFailed: "فشل GPS المباشر: {msg} — يتم الاحتفاظ بموقع العمل الحالي.",
+        gpsUnsupported: "هذا المتصفح لا يدعم GPS المباشر — يتم الاحتفاظ بموقع العمل الحالي.",
+        gpsOk: "تم تعيين موقع العمل المباشر: {lat}، {lon}.",
+        telemetryLive: "بث Open-Meteo المباشر ({ms} مللي ثانية، {time} UTC)",
         lagosBtn: "▶ لاغوس +6°م عرض تجريبي",
         mussafahBtn: "↺ العودة إلى مصفح",
         triageBtn: "🚀 تشغيل الفرز",
@@ -358,7 +463,9 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         customLon: "خط الطول المخصص",
         spikeLabel: "محاكاة شذوذ موجة حر شديدة (<span class=\"tg-keep-ltr\">+°C</span> تُضاف إلى القياسات المباشرة)",
         nioshTitle: "حدود NIOSH لشدة العمل (عمّال متأقلمون، عمل متواصل)",
-        isoCaption: "يتبع WBGT ترجيح ISO 7243 (<span class=\"tg-keep-ltr\">0.7 wet bulb + 0.2 globe + 0.1 dry bulb</span>).",
+        nioshTitleAccl: "حدود NIOSH لشدة العمل (عمّال متأقلمون، عمل متواصل)",
+        nioshTitleUnaccl: "حدود NIOSH لشدة العمل (عمّال غير متأقلمين، عمل متواصل)",
+        isoCaption: "يتبع WBGT ترجيح ISO 7243 (<span class=\"tg-keep-ltr\">0.7 البصيلة الرطبة + 0.2 الكرة السوداء + 0.1 البصيلة الجافة</span>).",
         s3cap: "مؤشر الإجهاد الحراري التراكمي هو درجة خطر أولية قابلة للتفسير (<span class=\"tg-keep-ltr\">0–4</span> نقاط/يوم من ذروة WBGT + دين الاستشفاء الليلي فوق <span class=\"tg-keep-ltr\">28°C</span>)، وليس تشخيصاً سريرياً.",
         daySliderLabel: "📅 مرّر عبر الأيام الستة — وشاهد الإجهاد يتراكم",
         baLabel: "⚖️ قبل / بعد — اسحب لتطبيق جدول الراحة",
@@ -389,39 +496,60 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         zoneWbgtLabel: "تقدير WBGT في {zone}",
         zoneDelta: "الهواء: {air}°C | الرطوبة: {rh}% | الرياح: {wind} كم/ساعة",
         liveCaption: "قراءات مباشرة حتى {time} (التوقيت المحلي للموقع، Open-Meteo).",
+        liveBadge: "مباشر",
+        liveSource: "المصدر: Open-Meteo · يُحدَّث كل 60 ثانية · حتى {time}",
+        wbgtEstimate: "تقدير WBGT من درجة حرارة الهواء المباشرة والرطوبة والإشعاع الشمسي والرياح (بصيلة رطبة Stull + كرة شمسية معدلة للرياح) — وليس قراءة من مقياس WBGT فيزيائي.",
         spikedLabel: "WBGT في {site} (مع الموجة)",
-        alertCritical: "حرج: تجاوز WBGT بعد الموجة حد العمل المتوسط \u206628.0 °C\u2069. يجب إيقاف العمل الشاق والمتوسط المتواصل في الخارج.",
-        alertHigh: "إجهاد مرتفع: تجاوز WBGT بعد الموجة حد العمل الشاق \u206626.0 °C\u2069. يلزم تناوب صارم للعمل والراحة على فترات قصيرة.",
+        alertCritical: "حرج: تجاوز WBGT بعد الموجة الحد الفعال للعمل {workload} \u2066{limit} °C\u2069 بأكثر من 2.5 °C. يجب إيقاف العمل الشاق والمتوسط المتواصل في الخارج.",
+        alertHigh: "إجهاد مرتفع: تجاوز WBGT بعد الموجة الحد الفعال للعمل {workload} \u2066{limit} °C\u2069. يلزم تناوب صارم للعمل والراحة على فترات قصيرة.",
+        effRationale: "الحد الفعال للعمل {workload} \u2066{eff} °C\u2069 = حد NIOSH الأساسي \u2066{base} °C\u2069 - \u2066{pen} °C\u2069 (التأقلم -\u2066{acclimPen} °C\u2069؛ {debt} -\u2066{debtPen} °C\u2069)",
+        effDebtRedline: "الإجهاد التراكمي \u2066{n}\u2069 ≥ 12 (تم تجاوز الخط الأحمر)",
+        effDebtMultiday: "دين متعدد الأيام: \u2066{days}\u2069 أيام دين ليلي، الإجهاد التراكمي \u2066{n}\u2069",
+        effDebtNone: "لا توجد غرامة دين متعدد الأيام",
+        shiftExpShade: "استراحة الظل 13-15 — استراحة إلزامية في الظل 13:00-15:00، وهي أشد فترة حرارة، بغض النظر عن WBGT",
+        shiftExpHalt: "إيقاف استباقي — WBGT \u2066{wbgt} °C\u2069 أعلى من الحد الفعال للعمل {workload} \u2066{eff} °C\u2069 ({rationale})؛ لا عمل في الخارج",
+        shiftExpPacing: "إيقاع استباقي 30/30 — WBGT \u2066{wbgt} °C\u2069 أعلى من الحد الفعال للعمل {workload} \u2066{eff} °C\u2069؛ 30 دقيقة عمل / 30 دقيقة استراحة في الظل",
+        shiftExpBuffer: "هامش ما قبل الحد — WBGT \u2066{wbgt} °C\u2069 ضمن 1 °C من الحد الفعال للعمل {workload} \u2066{eff} °C\u2069؛ 45 دقيقة عمل / 15 دقيقة استراحة في الظل",
+        shiftExpSafe: "نافذة عمل متواصل آمنة — WBGT \u2066{wbgt} °C\u2069 أقل من الحد الفعال للعمل {workload} \u2066{eff} °C\u2069؛ عمل متواصل",
         chartTitle: "تقدير WBGT بالساعة، نافذة 6 أيام",
-        chartHeavy: "حد العمل الشاق \u206626 °C\u2069",
+        chartHeavy: "حد العمل الشاق \u2066{limit} °C\u2069",
         chartModerate: "حد العمل المتوسط \u206628 °C\u2069",
         chartUnavailable: "مخطط الإجهاد غير متاح (لم تُحمّل مكتبة المخططات). الجدول أدناه يحتوي على نفس بيانات الأيام الستة.",
         strainThDate: "التاريخ",
         strainThMaxTemp: "أقصى درجة حرارة (°C)",
         strainThNightMin: "أدنى درجة حرارة ليلاً (°C)",
         strainThMaxWbgt: "أقصى تقدير WBGT (°C)",
-        strainThHoursOver: "ساعات فوق حد العمل الشاق (26°C)",
+        strainThHoursOver: "ساعات فوق حد العمل الشاق ({limit}°C)",
         strainThDebt: "دين الاستشفاء الليلي (>28°C)",
         strainThPoints: "نقاط الإجهاد اليومية",
         strainThCumulative: "مؤشر الإجهاد التراكمي",
+        strainThSource: "المصدر",
+        strainObserved: "ملاحَظ",
+        strainForecast: "متوقَّع",
+        strainLegend: "الأيام الثلاثة الماضية + اليوم حتى الآن: ملاحَظ (Open-Meteo مباشرة). اليومان التاليان: متوقَّع. اليوم يمزج الساعات الملاحَظة حتى الآن مع ساعات متوقَّعة لاحقاً اليوم.",
         strainRed: "تم تجاوز الخط الأحمر: مؤشر الإجهاد الحراري التراكمي لمدة 6 أيام هو {total} (الحد: 12). الدين الحراري متعدد الأيام وفشل التبريد الليلي يشيران إلى خطر مرتفع للإنهاك الحراري الحاد والإجهاد الكلوي.",
         strainBelow: "مؤشر الإجهاد الحراري التراكمي لمدة 6 أيام: {total} / 12 (أدنى من حد الانهيار عند موجة \u2066+{spike}°C\u2069). ارفع منزلق محاكي موجة الحر لملاحظة تراكم الدين الحراري متعدد الأيام.",
         dayReadout: "اليوم {day} ({date}): أقصى WBGT \u2066{wbgt} °C\u2069، أدنى درجة ليلاً \u2066{night} °C\u2069، \u2066{points}\u2069 نقطة إجهاد، التراكمي \u2066{cum}\u2069 / 12",
         dayReadoutRed: " — تم تجاوز الخط الأحمر",
         dayReadoutHint: "اسحب المنزلق للتنقل بين الأيام.",
         kpiPreventedLabel: "ساعات العمل الشاق غير الآمنة التي تم منعها",
-        kpiPreventedDelta: "ساعات فوق \u206626.0 °C\u2069 WBGT مقيّدة تلقائياً",
+        kpiPreventedDelta: "ساعات فوق \u2066{limit} °C\u2069 WBGT مقيّدة تلقائياً",
         kpiCoolingLabel: "التبريد والظل الإلزامي",
         kpiCoolingDelta: "{h} ساعة إجمالي وقت الاستشفاء",
         kpiDebtLabel: "أيام دين الاستشفاء الليلي النشطة (>28°C)",
         kpiDebtDelta: "مؤشر فشل الاستشفاء الليلي",
+        shiftCaption: "خطة استباقية — مبنية على WBGT المباشر الآن إضافة إلى ساعات متوقَّعة",
         shiftIntro: "الجدول المتوقع ليوم <code>{tomorrow}</code> (عند موجة \u2066+{spike}°C\u2069): العمل الشاق مقيّد من <code>06:00–10:00</code>. الأطقم مجهولة الهوية (<code>الطاقم أ</code>، <code>الطاقم ب</code>).",
         shiftThHour: "الساعة",
         shiftThTemp: "درجة الحرارة المتوقعة (°C)",
         shiftThWbgt: "WBGT المتوقع (°C)",
         shiftThRatio: "نسبة العمل / الاستراحة",
         shiftThCrew: "إسناد الطاقم (مجهول الهوية)",
-        baPreventedDelta: "ساعات فوق \u206626.0 °C\u2069 WBGT مقيّدة تلقائياً · تم تطبيق \u2066{pct}%\u2069 من الجدول",
+        shiftThHydration: "بروتوكول الترطيب",
+        shiftThExplanation: "تعديل الجدول القابل للتفسير",
+        triageHydrationProtocol: "بروتوكول الترطيب (مترابط)",
+        triageCorrelation: "الارتباط القابل للتفسير",
+        baPreventedDelta: "ساعات فوق \u2066{limit} °C\u2069 WBGT مقيّدة تلقائياً · تم تطبيق \u2066{pct}%\u2069 من الجدول",
         baCoolingDelta: "{h} ساعة إجمالي وقت الاستشفاء · تم تطبيق \u2066{pct}%\u2069 من الجدول",
         triageEngine: "محرك الفرز النشط: {engine}",
         triageWorker: "العامل (مجهول الهوية)",
@@ -435,6 +563,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         triageHiBroadcast: "بث الطاقم بالهندية/الأردية",
         compareThSite: "الموقع",
         compareThCurrent: "WBGT الحالي (°C)",
+        compareThSolar: "الإشعاع الشمسي (واط/م²)",
         compareThMax: "أقصى WBGT خلال 6 أيام (°C)",
         compareThDebt: "أيام الدين",
         compareThTier: "مستوى الخطر",
@@ -485,13 +614,13 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         chartAria: "مخطط الإجهاد الحراري التراكمي على مدى 6 أيام، مع الخط الأحمر عند 12 نقطة",
         s11intro: "ثرميغراف نموذج أولي. يوضح هذا القسم ما يدعمه العلم، وما تم اختبار الكود عليه، وما لم يُثبت بعد. لا يُدَّعى هنا أي اقتباس من خبير أو اسم طبيب أو تجربة حقيقية.",
         s11hFormula: "معادلة WBGT",
-        s11formula: "في الخارج، تحت الشمس المباشرة: WBGT = <span class=\"tg-keep-ltr\">0.7 × natural wet bulb + 0.2 × black globe + 0.1 × dry bulb</span>. وفي الظل أو في الداخل: WBGT = <span class=\"tg-keep-ltr\">0.7 × natural wet bulb + 0.3 × black globe</span>. يستخدم ثرميغراف الترجيح الخارجي، مع البصيلة الرطبة بمعادلة ستول والكرة السوداء المقدَّرة من الإشعاع الشمسي. هذا تبسيط أولي لنموذج ليليغرين أدناه، وليس قراءة معايرة من مقياس.",
+        s11formula: "في الخارج، تحت الشمس المباشرة: WBGT = <span class=\"tg-keep-ltr\">0.7 × البصيلة الرطبة الطبيعية + 0.2 × الكرة السوداء + 0.1 × البصيلة الجافة</span>. وفي الظل أو في الداخل: WBGT = <span class=\"tg-keep-ltr\">0.7 × البصيلة الرطبة الطبيعية + 0.3 × الكرة السوداء</span>. يستخدم ثرميغراف الترجيح الخارجي، مع البصيلة الرطبة بمعادلة ستول والكرة السوداء المقدَّرة من الإشعاع الشمسي. هذا تبسيط أولي لنموذج ليليغرين أدناه، وليس قراءة معايرة من مقياس.",
         s11hNiosh: "حدود NIOSH للعمل",
-        s11niosh: "حدود التعرض الموصى بها، للعمال المتأقلمين، في العمل المتواصل: خفيف <span class=\"tg-keep-ltr\">30 °C</span>، متوسط <span class=\"tg-keep-ltr\">28 °C</span>، شاق <span class=\"tg-keep-ltr\">26 °C</span>، شاق جداً <span class=\"tg-keep-ltr\">25 °C</span>. والعمال غير المتأقلمين أقل بمقدار <span class=\"tg-keep-ltr\">2–3 °C</span>. وفوق الحد، توصي NIOSH بجدولة العمل والراحة: <span class=\"tg-keep-ltr\">45 عمل / 15 استراحة</span>، ثم <span class=\"tg-keep-ltr\">30 / 30</span>، ثم <span class=\"tg-keep-ltr\">15 / 45</span>، ثم التوقف. ويستخدم ثرميغراف حدود المتأقلمين وخطوتي <span class=\"tg-keep-ltr\">45/15</span> و<span class=\"tg-keep-ltr\">30/30</span>.",
+        s11niosh: "حدود التعرض الموصى بها، للعمال المتأقلمين، في العمل المتواصل: خفيف <span class=\"tg-keep-ltr\">30 °C</span>، متوسط <span class=\"tg-keep-ltr\">28 °C</span>، شاق <span class=\"tg-keep-ltr\">26 °C</span>، شاق جداً <span class=\"tg-keep-ltr\">25 °C</span>. والعمال غير المتأقلمين أقل بمقدار <span class=\"tg-keep-ltr\">2–3 °C</span>. وفوق الحد، توصي NIOSH بجدولة العمل والراحة: <span class=\"tg-keep-ltr\">45 عمل / 15 استراحة</span>، ثم <span class=\"tg-keep-ltr\">30 / 30</span>، ثم <span class=\"tg-keep-ltr\">15 / 45</span>، ثم التوقف. ومنذ الإصدار v22 يستخدم ثرميغراف الحد الفعال، وليس حد المتأقلمين: الحد الأساسي لـ NIOSH ناقص جزاء التأقلم (<span class=\"tg-keep-ltr\">0 / 1.5 / 2.5 °C</span>) وجزاء الدين متعدد الأيام (<span class=\"tg-keep-ltr\">0.5 / 1.0 °C</span>).",
         s11hMulti: "الإجهاد متعدد الأيام وإصابة الكلى",
         s11multi: "يدّعي ثرميغراف أن ضربة الشمس وإصابة الكلى الحادة تأتيان من الإجهاد التراكمي متعدد الأيام، وليس من ظهيرة حارة واحدة. وفي دراسة عمال المزارع في فلوريدا أدناه، بدأ أكثر من نصف العمال يومهم وهم يعانون الجفاف، وأصيب <span class=\"tg-keep-ltr\">81%</span> بالجفاف بعد يوم عمل، وأصيب ثلثهم بإصابة كلى حادة مرة واحدة على الأقل خلال ثلاثة أيام عمل صيفية. وارتفعت احتمالات إصابة الكلى الحادة بنسبة <span class=\"tg-keep-ltr\">47%</span> مع كل زيادة <span class=\"tg-keep-ltr\">5 درجات</span> في مؤشر الحرارة، وارتفع انتشار إصابة الكلى من <span class=\"tg-keep-ltr\">21%</span> إلى <span class=\"tg-keep-ltr\">43%</span> خلال ثلاث سنوات لدى عمال السراخس. وهذا يدعم تتبع الإجهاد على مدى 6 أيام وتنبيه فشل الاستشفاء الليلي عندما يبقى الحد الأدنى الليلي فوق <span class=\"tg-keep-ltr\">28 °C</span>.",
-        s11hValid: "اختبارات التحقق: <span class=\"tg-keep-ltr\">8 / 8</span> ناجحة",
-        s11validIntro: "نجحت اختبارات التحقق في فحص 2026-11-16، وأُجريت دون شبكة ودون Gemini ودون بيانات مرضى:",
+        s11hValid: "اختبارات التحقق: <span class=\"tg-keep-ltr\">9 / 9</span> ناجحة",
+        s11validIntro: "نجحت اختبارات التحقق في فحص 2026-11-21، وأُجريت دون شبكة ودون Groq ودون بيانات مرضى:",
         s11v1: "البصيلة الرطبة بمعادلة ستول: <span class=\"tg-keep-ltr\">29.1 °C, 43% RH</span> تعطي بصيلة رطبة قدرها <span class=\"tg-keep-ltr\">20.3 °C</span>.",
         s11v2: "معادلة WBGT: ترجيح <span class=\"tg-keep-ltr\">0.7 / 0.2 / 0.1</span> على مدخلات ثابتة للبصيلة الرطبة والكرة السوداء والبصيلة الجافة.",
         s11v3: "تقدير WBGT المباشر في مصفح: <span class=\"tg-keep-ltr\">25.4 °C</span> عند <span class=\"tg-keep-ltr\">29.1 °C, 43% RH, 631 W/m²</span> من الإشعاع الشمسي.",
@@ -500,15 +629,27 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         s11v6: "نقاط الإجهاد اليومية: <span class=\"tg-keep-ltr\">1</span> نقطة عند <span class=\"tg-keep-ltr\">25.4 °C</span>، و<span class=\"tg-keep-ltr\">3</span> نقاط فوق <span class=\"tg-keep-ltr\">28 °C</span>، إضافة إلى <span class=\"tg-keep-ltr\">1</span> نقطة لدين الاستشفاء.",
         s11v7: "دين الاستشفاء: الحد الأدنى الليلي فوق <span class=\"tg-keep-ltr\">28 °C</span> يعني نعم، وعند <span class=\"tg-keep-ltr\">28 °C</span> أو أقل يعني لا.",
         s11v8: "نموذج الفرز: الملاحظة النموذجية تعيد نتيجة حرجة، مع القيء وتوقف التعرق ضمن الأعراض.",
+        s11v9: "مطابقة جدول القياسات النفسية: البصيلة الرطبة بمعادلة ستول تطابق الجدول المنشور لـ ASHRAE ضمن <span class=\"tg-keep-ltr\">0.7 °C</span> عبر <span class=\"tg-keep-ltr\">10</span> نقاط عند <span class=\"tg-keep-ltr\">35 °C، ورطوبة نسبية 10–100%</span>، وأكبر انحراف <span class=\"tg-keep-ltr\">0.64 °C</span>.",
         s11hLimits: "الحدود، بكلمات بسيطة",
         s11l1: "يُقدَّر WBGT من بيانات الطقس، ولا يُقاس بمقياس كروي.",
         s11l2: "تُقدَّر درجة حرارة الكرة السوداء من الإشعاع الشمسي، ولا تُقاس.",
-        s11l3: "تصحيح الملابس (ISO 7243 الملحق ج، <span class=\"tg-keep-ltr\">+0 / +1 / +2 / +4 °C</span>) يُطبَّق فعلاً عبر محدد الملابس / معدات الوقاية في القسم 2. أما التأقلم والعمر والتاريخ الطبي فلا تُنمذج بعد.",
+        s11l3: "تصحيح الملابس (ISO 7243 الملحق ج، <span class=\"tg-keep-ltr\">+0 / +1 / +2 / +4 °C</span>) يُطبَّق فعلاً عبر محدد الملابس / معدات الوقاية في القسم 2. التأقلم يُنمذج الآن فعلاً عبر محدد القسم 2 (الحد الفعال، v22). أما العمر والتاريخ الطبي فلا يُنمذجان بعد.",
         s11l4: "الدرجة التراكمية 12 هي درجة أولية، وليست حداً سريرياً.",
         s11l5: "الفرز استخراج منظم من ملاحظة مكتوبة، وليس تشخيصاً طبياً.",
         s11l6: "لا يُدَّعى وجود طاقم حقيقي أو وردية حقيقية أو قراءة مقياس حقيقية.",
         s11expert: "مراجعة الخبراء: لا يوجد بعد. لم يراجع أي طبيب سريري هذا النموذج الأولي. ولن يُملأ هذا القسم إلا بمراجع حقيقي، مع الاسم والمؤهل والمنظمة والتاريخ، وبموافقته فقط.",
         s11hRefs: "المراجع",
+        navLiveMap: "1. الخريطة المباشرة",
+        navSimulator: "2. المحاكي",
+        navStrain: "3. الإجهاد 6 أيام",
+        navShift: "4. خطة الوردية",
+        navTriage: "5. الفرز بالذكاء الاصطناعي",
+        navGlobal: "7. عالمي",
+        navRoi: "8. العائد",
+        navWorker: "10. تطبيق العامل",
+        navEvidence: "11. الأدلة",
+        triageLoading: "⚡ الذكاء الاصطناعي المباشر من Groq يحلل القياسات وديون 6 أيام…",
+        effBannerLabel: "الحد الفعال",
     };
 
     // v20 helpers: lookup with EN fallback, placeholder fill, and the
@@ -523,9 +664,12 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     const SITE_AR = { "Mussafah (UAE — Host Pilot)": "مصفح (الإمارات — الموقع التجريبي المضيف)", "KEZAD / Khalifa Port (UAE — Host Pilot)": "كيزاد / ميناء خليفة (الإمارات — الموقع التجريبي المضيف)", "Ruwais (UAE — Host Pilot)": "الرويس (الإمارات — الموقع التجريبي المضيف)", "Lagos — Lekki Industrial Zone (Nigeria / West Africa)": "لاغوس — منطقة ليكي الصناعية (نيجيريا / غرب أفريقيا)", "Delhi NCR — Industrial Belt (India / South Asia)": "دلهي — الحزام الصناعي (الهند / جنوب آسيا)", "Houston — Petrochemical Corridor (USA / North America)": "هيوستن — ممر البتروكيماويات (الولايات المتحدة / أمريكا الشمالية)", "Custom Global GPS Coordinates (Any Worksite Worldwide)": "إحداثيات GPS مخصصة (أي موقع عمل في العالم)" };
     const COMPARE_AR = { "Mussafah (UAE)": "مصفح (الإمارات)", "Lagos (Nigeria)": "لاغوس (نيجيريا)", "Delhi NCR (India)": "دلهي (الهند)", "Houston (USA)": "هيوستن (الولايات المتحدة)" };
     const WORK_AR = { "Light": "خفيف", "Moderate": "متوسط", "Heavy": "شاق", "Very heavy": "شاق جداً" };
+    // v28.1: definite forms, used when the workload sits inside an
+    // Arabic phrase ("الحد الفعال للعمل الشاق", not "للعمل شاق").
+    const WORK_AR_DEF = { "Light": "الخفيف", "Moderate": "المتوسط", "Heavy": "الشاق", "Very heavy": "الشاق جداً" };
     const SEV_AR = { "Critical": "حرجة", "High": "عالية", "Moderate": "متوسطة", "Low": "منخفضة" };
     const TIER_AR = { "Critical": "حرجة", "High": "عالية", "Moderate": "متوسطة", "Low": "منخفضة" };
-    const CASE_AR = { "Case 1: Acute CNS Heat Stroke & Anhydrosis (Critical Red Flag)": "الحالة 1: ضربة شمس حادة مع توقف التعرق (علامة حرجة)", "Case 2: Early Renal Strain / Dehydration & Muscle Cramps (High Risk)": "الحالة 2: إجهاد كلوي مبكر / جفاف وتشنجات عضلية (خطر مرتفع)", "Case 3: Multilingual Field Note (Arabic / Hindi-Urdu / English)": "الحالة 3: ملاحظة ميدانية متعددة اللغات (العربية / الهندية-الأردية / الإنجليزية)" };
+    const CASE_AR = { "Case 1: Acute CNS Heat Stroke & Anhydrosis (Critical Red Flag)": "الحالة 1: ضربة شمس حادة مع توقف التعرق (علامة حرجة)", "Case 2: Early Renal Strain / Dehydration & Muscle Cramps (High Risk)": "الحالة 2: إجهاد كلوي مبكر / جفاف وتشنجات عضلية (خطر مرتفع)", "Case 3: Multilingual Field Note (Arabic / Hindi-Urdu / English)": "الحالة 3: ملاحظة ميدانية متعددة اللغات (العربية / الهندية-الأردية / الإنجليزية)", "Case 4: Unacclimatised New Cohort + Multi-Day Cumulative Strain (Proactive Escalation)": "الحالة 4: مجموعة جديدة غير متأقلمة + إجهاد تراكمي متعدد الأيام (تصعيد استباقي)" };
     const CLOTHING_AR = { "light_civilian": "ملابس مدنية خفيفة", "coveralls": "أفرول — ملابس عمل كاملة", "construction_ppe": "معدات الوقاية الشخصية للبناء", "impermeable_suit": "بدلة غير منفذة" };
     const SHORT_AR = { "Mussafah": "مصفح", "KEZAD": "كيزاد", "Ruwais": "الرويس", "Lagos": "لاغوس", "Delhi": "دلهي", "Houston": "هيوستن" };
     const PROTOCOL_AR = { "NO OUTDOOR WORK": "لا عمل في الخارج", "30 work / 30 rest": "30 عمل / 30 استراحة", "45 work / 15 rest": "45 عمل / 15 استراحة", "60 work / 0 rest": "60 عمل / 0 استراحة", "SHADE BREAK (No outdoor work)": "استراحة الظل (لا عمل في الخارج)" };
@@ -548,7 +692,22 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     // Triage result content is derived from the typed note, so symptoms /
     // hydration / friction stay as entered (English). Only the fixed
     // wrapper (worker summary, tier, action) is translated.
+    // v28: client-side PII redaction backup for the triage worker summary.
+    // The Cloudflare Worker already enforces "[Worker - Anonymised]"
+    // server-side; this is defence in depth and must never alter a
+    // correctly anonymised summary (it already contains the marker).
+    function redactWorkerSummary(s) {
+        if (!s) return s;
+        if (s.indexOf("[Worker - Anonymised]") !== -1) return s;
+        const comma = s.indexOf(",");
+        if (comma > 0) {
+            const head = s.slice(0, comma).trim();
+            if (/^[A-Z][a-z]+ [A-Z][a-z]+$/.test(head)) return "[Worker - Anonymised]" + s.slice(comma);
+        }
+        return "[Worker - Anonymised] - " + s;
+    }
     function translateSummary(s) {
+        s = redactWorkerSummary(s);
         if (!isAr() || !s) return s;
         return s.replace("[Worker - Anonymised]", "[عامل — مجهول الهوية]")
             .replace("Adult worker", "عامل بالغ").replace("Global Site", "موقع عالمي")
@@ -560,6 +719,61 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         const tr = TRIAGE_AR[r.symptomSeverity];
         if (!tr) return { tier: r.oshaRiskTier, action: r.immediateAction };
         return { tier: tr.tier + " — WBGT " + state.spikedWbgt.toFixed(1) + " °C", action: tr.action };
+    }
+    // v28.1: hydration protocol strings are built in logic.js in
+    // English (four fixed texts + an optional bolus suffix). Map
+    // them to Arabic at render time, like PROTOCOL_AR. Unknown text
+    // (e.g. a live Groq triage protocol) passes through unchanged.
+    const HYDRATION_AR = {
+        "1000 mL/hr chilled ORS, every 15 min": "1000 مل/ساعة محلول إماهة فموية مبرّد، كل 15 دقيقة",
+        "750 mL/hr chilled ORS, every 20 min": "750 مل/ساعة محلول إماهة فموية مبرّد، كل 20 دقيقة",
+        "500 mL/hr ORS, every 30 min": "500 مل/ساعة محلول إماهة فموية، كل 30 دقيقة",
+        "350 mL/hr baseline hydration": "350 مل/ساعة ترطيب أساسي",
+    };
+    const HYDRATION_BOLUS_EN = " + 500 mL pre-shift morning ORS bolus (nocturnal debt)";
+    const HYDRATION_BOLUS_AR = " + 500 مل جرعة صباحية من محلول الإماهة الفموية قبل الوردية (دين ليلي)";
+    function translateHydration(text) {
+        if (!isAr() || !text) return text;
+        let base = text, hasBolus = false;
+        if (text.slice(-HYDRATION_BOLUS_EN.length) === HYDRATION_BOLUS_EN) {
+            base = text.slice(0, -HYDRATION_BOLUS_EN.length);
+            hasBolus = true;
+        }
+        const ar = HYDRATION_AR[base];
+        if (!ar) return text;
+        return ar + (hasBolus ? HYDRATION_BOLUS_AR : "");
+    }
+    // v28.1: render the effective-limit rationale from the structured
+    // parts logic.js returns (effectiveWorkLimit [3]). The English
+    // template reproduces the logic.js rationale string byte for byte;
+    // the Arabic template is the same breakdown in Arabic.
+    function rationaleDebtText(p) {
+        if (p.debtKind === "redline") return tf("effDebtRedline", { n: p.debtStrain });
+        if (p.debtKind === "multiday") return tf("effDebtMultiday", { days: p.debtDays, n: p.debtStrain });
+        return t("effDebtNone");
+    }
+    function rationaleText(effInfoOrParts) {
+        const p = Array.isArray(effInfoOrParts) ? effInfoOrParts[3] : effInfoOrParts;
+        if (!p) return Array.isArray(effInfoOrParts) ? effInfoOrParts[2] : "";
+        return tf("effRationale", {
+            workload: isAr() ? (WORK_AR_DEF[p.workload] || p.workload) : p.workload,
+            eff: p.effLimit.toFixed(1), base: p.base.toFixed(1), pen: p.totalPen.toFixed(1),
+            acclimPen: p.acclimPen.toFixed(1), debt: rationaleDebtText(p), debtPen: p.debtPen.toFixed(1),
+        });
+    }
+    // v28.1: render a shift-schedule explanation from its structured
+    // parts (computeShiftSchedule rows carry explanationParts). The
+    // English templates reproduce the logic.js strings byte for byte.
+    function shiftExplanationText(row) {
+        const p = row.explanationParts;
+        if (!p) return row.explanation || "";
+        const workload = isAr() ? (WORK_AR_DEF[p.workload] || p.workload) : p.workload;
+        const base = { wbgt: p.wbgt.toFixed(1), workload: workload, eff: p.effLimit.toFixed(1) };
+        if (p.kind === "SHADE") return t("shiftExpShade");
+        if (p.kind === "HALT") return tf("shiftExpHalt", Object.assign({}, base, { rationale: rationaleText(p.rationaleParts) }));
+        if (p.kind === "PACING") return tf("shiftExpPacing", base);
+        if (p.kind === "BUFFER") return tf("shiftExpBuffer", base);
+        return tf("shiftExpSafe", base);
     }
     // Map tooltip / popup labels, with the number pinned LTR.
     function mapLabel(name, wbgt) {
@@ -607,6 +821,12 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         spike: 0,
         demoSpike: 0,
         clothing: "light_civilian",
+        workload: "Heavy",
+        acclimatization: "acclimatised",
+        exposure: "open_sun",
+        autoPoll: true,
+        lastLatencyMs: 0,
+        autoPollTimer: null,
         customLat: 24.3613,
         customLon: 54.5038,
         live: null,          // { zoneName: { current, solar, wbgt, wetBulb, globe } }
@@ -681,9 +901,27 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     // Open-Meteo fetching (no key needed) + last-good cache
     // ------------------------------------------------------------------
     const OM_BASE = "https://api.open-meteo.com/v1/forecast";
+    // v22: record the round-trip time of every Open-Meteo call and
+    // show it in the telemetry heartbeat (Section 2), so a judge can
+    // see the stream is live, not a cached screenshot.
+    function updateHeartbeat() {
+        const node = $("telemetryHeartbeat");
+        if (!node) return;
+        const time = new Date().toISOString().slice(11, 19);
+        node.textContent = tf("telemetryLive", { ms: state.lastLatencyMs, time: time });
+        // v25 polish: brief green flash on every live poll so the
+        // 60 s Open-Meteo stream is visibly ticking.
+        node.classList.remove("tg-heartbeat-tick");
+        void node.offsetWidth;
+        node.classList.add("tg-heartbeat-tick");
+    }
     async function omFetch(params) {
         const q = new URLSearchParams(params);
+        const t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
         const res = await fetch(OM_BASE + "?" + q.toString());
+        const t1 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+        state.lastLatencyMs = Math.round(t1 - t0);
+        updateHeartbeat();
         if (!res.ok) throw new Error("Open-Meteo HTTP " + res.status);
         return res.json();
     }
@@ -761,22 +999,67 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     // ------------------------------------------------------------------
     // Rendering — Section 1 (live zones + 3D map)
     // ------------------------------------------------------------------
+    const ZONE_TO_SITE = {
+        "Mussafah (UAE)": "Mussafah (UAE — Host Pilot)",
+        "KEZAD / Khalifa Port (UAE)": "KEZAD / Khalifa Port (UAE — Host Pilot)",
+        "Ruwais (UAE)": "Ruwais (UAE — Host Pilot)",
+    };
+
+    function zoneRiskMeta(wbgt) {
+        if (wbgt > 28.0) return { cardCls: "risk-red", badgeCls: "tg-badge-red", label: isAr() ? "حرج" : "CRITICAL" };
+        if (wbgt > 26.0) return { cardCls: "risk-orange", badgeCls: "tg-badge-amber", label: isAr() ? "مرتفع" : "HIGH" };
+        if (wbgt > 25.0) return { cardCls: "risk-amber", badgeCls: "tg-badge-amber", label: isAr() ? "حذر" : "CAUTION" };
+        return { cardCls: "", badgeCls: "tg-badge-green", label: isAr() ? "آمن" : "SAFE" };
+    }
+
     function renderZoneCards() {
         const wrap = $("zoneCards");
         wrap.innerHTML = "";
         if (!state.live) return;
         for (const name of Object.keys(L.ZONES)) {
             const z = state.live[name];
-            const card = el("div", "tg-metric");
+            const meta = zoneRiskMeta(z.wbgt);
+            const card = el("div", "tg-metric tg-zone-interactive" + (meta.cardCls ? " " + meta.cardCls : ""));
+            card.setAttribute("role", "button");
+            card.tabIndex = 0;
+            card.title = isAr() ? "انقر لفحص هذا الموقع في المحاكي" : "Click to inspect this corridor in the simulator";
+
+            const header = el("div", "tg-zone-header");
             const label = el("div", "tg-metric-label", tf("zoneWbgtLabel", { zone: zoneName(name) }));
+            const pill = el("span", "tg-badge " + meta.badgeCls, meta.label);
+            header.appendChild(label);
+            header.appendChild(pill);
+
             const value = el("div", "tg-metric-value tg-keep-ltr");
             const delta = el("div", "tg-metric-delta tg-keep-ltr",
                 tf("zoneDelta", { air: z.current.temperature_2m, rh: z.current.relative_humidity_2m, wind: z.current.wind_speed_10m }));
-            card.appendChild(label); card.appendChild(value); card.appendChild(delta);
+            const hint = el("div", "tg-zone-hint", isAr() ? "انقر للتحليل ←" : "Click to inspect →");
+
+            const selectZone = async function () {
+                const targetSite = ZONE_TO_SITE[name];
+                if (!targetSite) return;
+                state.siteLabel = targetSite;
+                $("siteSelect").value = targetSite;
+                syncCustomGpsInputs();
+                await loadActive();
+                const s2 = $("section2");
+                if (s2) s2.scrollIntoView({ behavior: "smooth", block: "start" });
+            };
+            card.addEventListener("click", selectZone);
+            card.addEventListener("keydown", function (ev) {
+                if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectZone(); }
+            });
+
+            card.appendChild(header);
+            card.appendChild(value);
+            card.appendChild(delta);
+            card.appendChild(hint);
             wrap.appendChild(card);
             animateNumber(value, z.wbgt, 1, " °C");
         }
-        $("liveCaption").textContent = tf("liveCaption", { time: state.liveTime });
+        $("liveCaption").innerHTML = tf("liveCaption", { time: '&nbsp;<span class="tg-keep-ltr">' + state.liveTime + "</span>" });
+        const ls = $("liveSource");
+        if (ls) ls.innerHTML = tf("liveSource", { time: '&nbsp;<span class="tg-keep-ltr">' + state.liveTime + "</span>" });
     }
 
     function zoneRows() {
@@ -874,6 +1157,14 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                 attribution: "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics",
             });
             window.L.control.layers({ "Street": state.mapTile, "Satellite": state.mapSat }).addTo(state.map);
+            // v25 polish: dark-mode Street tiles get the dark filter;
+            // Satellite stays full colour.
+            state.mapBaseStreet = true;
+            container.classList.toggle("tg-map-dark-tiles", isDark);
+            state.map.on("baselayerchange", function (ev) {
+                state.mapBaseStreet = (ev.name === "Street");
+                container.classList.toggle("tg-map-dark-tiles", state.theme === "dark" && state.mapBaseStreet);
+            });
             state.mapMarkers = {};
             state.mapRings = {};
             // Leaflet needs the box to have its final size; re-check after
@@ -889,6 +1180,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             fitAbuDhabi();
         } else {
             state.mapTile.setUrl(leafletTileUrl(isDark));
+            container.classList.toggle("tg-map-dark-tiles", isDark && state.mapBaseStreet !== false);
         }
         for (const r of zoneRows()) {
             const c = "rgb(" + r.color[0] + "," + r.color[1] + "," + r.color[2] + ")";
@@ -956,8 +1248,22 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     function renderSection2() {
         const a = state.activeLive;
         if (!a) return;
+        // v26 fix: first-load banner gap. Every caller renders Section 2
+        // before Section 3, but the banner's effective limit reads
+        // state.totalStrain / state.debtDays, which Section 3 is the one
+        // that computes (initial state is 0/0, so the banner said 26.0 C
+        // while the shift plan already used 25.5 C). Recompute the strain
+        // here first, with the exact same call renderSection3 uses, so
+        // the banner and the shift plan always agree, on first load and
+        // after every control change. Pure function; renderSection3
+        // recomputes it again right after, harmlessly.
+        if (state.activeHourly) {
+            const _sr = L.computeTimelineAndStrain(state.activeHourly, state.spike, state.clothing, state.exposure, state.workload, state.acclimatization);
+            state.totalStrain = _sr.totalStrain;
+            state.debtDays = _sr.debtDays;
+        }
         const c = a.current;
-        const res = L.estimateWBGT(c.temperature_2m + state.spike, c.relative_humidity_2m, a.solar, c.wind_speed_10m, state.clothing);
+        const res = L.estimateWBGT(c.temperature_2m + state.spike, c.relative_humidity_2m, a.solar, c.wind_speed_10m, state.clothing, state.exposure);
         state.spikedWbgt = res[0]; state.spikedTw = res[1]; state.spikedTg = res[2];
         $("spikeValue").textContent = "+" + state.spike + " °C";
         const metric = $("spikedMetric");
@@ -970,30 +1276,53 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                 ? ("شذوذ " + "\u2066" + "+" + state.spike + " °C" + "\u2069" + " | الملابس: " + "\u2066" + "+" + clothingCorr.toFixed(0) + " °C" + "\u2069" + " (ISO 7243 الملحق ج) | البصيلة الرطبة: " + "\u2066" + state.spikedTw.toFixed(1) + "°C" + "\u2069" + " | الكرة السوداء: " + "\u2066" + state.spikedTg.toFixed(1) + "°C" + "\u2069")
                 : ("+" + state.spike + " °C anomaly | Clothing: +" + clothingCorr.toFixed(0) + " °C (ISO 7243 Annex C) | Wet-Bulb: " + state.spikedTw.toFixed(1) + "°C | Globe: " + state.spikedTg.toFixed(1) + "°C"));
         metric.appendChild(label); metric.appendChild(value); metric.appendChild(delta);
-        animateNumber(value, state.spikedWbgt, 1, " °C");
+        if (state.siteJustChanged) {
+            value.textContent = state.spikedWbgt.toFixed(1) + " °C";
+            value.dataset.value = String(state.spikedWbgt);
+            state.siteJustChanged = false;
+        } else {
+            animateNumber(value, state.spikedWbgt, 1, " °C");
+        }
+        // v24: effective limit — acclimatisation + multi-day debt penalty
+        // subtracted from every NIOSH base limit, so the chips flip live
+        // when a judge changes Acclimatisation. effInfo = [effLimit, totalPen, rationale].
+        const effInfo = L.effectiveWorkLimit(state.workload, state.acclimatization, state.totalStrain, state.debtDays);
+        // v25 fix 2: the NIOSH heading must match the coupled chips —
+        // ACCLIMATISED or UNACCLIMATISED, in the active language.
+        const nioshTitleEl = $("nioshTitleEl");
+        if (nioshTitleEl) nioshTitleEl.textContent = t(state.acclimatization === "unacclimatised" ? "nioshTitleUnaccl" : "nioshTitleAccl");
+        const effBanner = $("effectiveLimitBanner");
+        if (effBanner) {
+            // v28.1: the rationale is rendered from its structured
+            // parts, so Arabic gets the translated breakdown.
+            effBanner.innerHTML = "<span>" + esc(t("effBannerLabel")) + ": <b>" + effInfo[0].toFixed(1) + " °C</b></span><span>" + esc(rationaleText(effInfo)) + "</span>";
+        }
         // NIOSH chips (translated workload + status; numbers stay LTR,
         // chips stay in Light -> Very heavy order in both languages).
         const chips = $("nioshChips");
         chips.innerHTML = "";
         for (const work of Object.keys(L.NIOSH_LIMITS)) {
-            const limit = L.NIOSH_LIMITS[work];
+            const limit = L.NIOSH_LIMITS[work] - effInfo[1];
             const ok = state.spikedWbgt <= limit;
             const wName = isAr() ? WORK_AR[work] : work;
             const status = isAr() ? (ok ? "ضمن الحد" : "تجاوز الحد") : (ok ? "OK" : "OVER LIMIT");
             const chip = el("div", "tg-niosh-chip tg-keep-ltr " + (ok ? "tg-chip-ok" : "tg-chip-over"),
-                "  " + wName + ": " + status + " (" + state.spikedWbgt.toFixed(1) + " " + (ok ? "<=" : ">") + " " + limit.toFixed(0) + ")");
+                "  " + wName + ": " + status + " (" + state.spikedWbgt.toFixed(1) + " " + (ok ? "<=" : ">") + " " + limit.toFixed(1) + ")");
             chips.appendChild(chip);
         }
-        // Alert
+        // Alert — thresholds are the effective limit, not fixed 28/26:
+        // critical above effLimit + 2.5, high above effLimit.
+        // v28.1: the text names that same effective limit.
         const alert = $("spikeAlert");
-        if (state.spikedWbgt > 28.0) {
+        const alertWorkload = isAr() ? (WORK_AR_DEF[state.workload] || state.workload) : state.workload;
+        if (state.spikedWbgt > effInfo[0] + 2.5) {
             alert.hidden = false;
             alert.className = "tg-alert tg-alert-error";
-            alert.textContent = t("alertCritical");
-        } else if (state.spikedWbgt > 26.0) {
+            alert.textContent = tf("alertCritical", { limit: effInfo[0].toFixed(1), workload: alertWorkload });
+        } else if (state.spikedWbgt > effInfo[0]) {
             alert.hidden = false;
             alert.className = "tg-alert tg-alert-warn";
-            alert.textContent = t("alertHigh");
+            alert.textContent = tf("alertHigh", { limit: effInfo[0].toFixed(1), workload: alertWorkload });
         } else {
             alert.hidden = true;
         }
@@ -1009,7 +1338,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     function renderSection3() {
         const h = state.activeHourly;
         if (!h) return;
-        const r = L.computeTimelineAndStrain(h, state.spike, state.clothing);
+        const r = L.computeTimelineAndStrain(h, state.spike, state.clothing, state.exposure, state.workload, state.acclimatization);
         state.totalStrain = r.totalStrain;
         state.debtDays = r.debtDays;
         state.dailyRows = r.dailyRows;
@@ -1019,15 +1348,18 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         wrap.innerHTML = "";
         const table = el("table", "tg-table tg-keep-ltr");
         const thead = document.createElement("thead");
-        thead.innerHTML = "<tr><th>" + t("strainThDate") + "</th><th>" + t("strainThMaxTemp") + "</th><th>" + t("strainThNightMin") + "</th><th>" + t("strainThMaxWbgt") + "</th><th>" + t("strainThHoursOver") + "</th><th>" + t("strainThDebt") + "</th><th>" + t("strainThPoints") + "</th><th>" + t("strainThCumulative") + "</th></tr>";
+        thead.innerHTML = "<tr><th>" + t("strainThDate") + "</th><th>" + t("strainThSource") + "</th><th>" + t("strainThMaxTemp") + "</th><th>" + t("strainThNightMin") + "</th><th>" + t("strainThMaxWbgt") + "</th><th>" + tf("strainThHoursOver", { limit: r.effectiveLimit.toFixed(1) }) + "</th><th>" + t("strainThDebt") + "</th><th>" + t("strainThPoints") + "</th><th>" + t("strainThCumulative") + "</th></tr>";
         const tbody = document.createElement("tbody");
-        for (const d of r.dailyRows) {
+        // v23: last 2 rows of the 6-day window are the next 2 days = Forecast;
+        // past 3 days + today = Observed (live Open-Meteo). Numbers unchanged.
+        r.dailyRows.forEach(function (d, idx) {
+            const src = idx >= r.dailyRows.length - 2 ? t("strainForecast") : t("strainObserved");
             const tr = document.createElement("tr");
-            tr.innerHTML = "<td>" + esc(d.date) + "</td><td>" + d.maxTemp.toFixed(1) + "</td><td>" + d.nightMin.toFixed(1) + "</td><td>" +
+            tr.innerHTML = "<td>" + esc(d.date) + "</td><td>" + esc(src) + "</td><td>" + d.maxTemp.toFixed(1) + "</td><td>" + d.nightMin.toFixed(1) + "</td><td>" +
                 d.maxWbgt.toFixed(1) + "</td><td>" + d.hoursOverHeavy + "</td><td>" + esc(isAr() ? (d.recoveryDebt.indexOf("YES") === 0 ? "نعم (\u2066+1\u2069 نقطة)" : "لا") : d.recoveryDebt) + "</td><td>" +
                 d.points + "</td><td><b>" + d.cumulative + "</b></td>";
             tbody.appendChild(tr);
-        }
+        });
         table.appendChild(thead); table.appendChild(tbody);
         wrap.appendChild(table);
         // Banner
@@ -1047,6 +1379,9 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         const fillEl = $("gaugeFill");
         fillEl.style.width = fill.toFixed(0) + "%";
         fillEl.style.background = colour;
+        // v25 polish: pulsing crimson glow once the red line is crossed.
+        fillEl.classList.toggle("is-critical", r.totalStrain >= 12);
+        banner.classList.toggle("is-critical", r.totalStrain >= 12);
         const numEl = $("gaugeNumber");
         numEl.textContent = r.totalStrain + " / 12";
         numEl.style.color = colour;
@@ -1068,6 +1403,13 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         const fontCol = isDark ? "#e2e8f0" : "#334155";
         const lineCol = isDark ? "#38bdf8" : "#0284c7";
         const data = [{ x: x, y: y, type: "scatter", mode: "lines", name: "WBGT estimate (C)", line: { color: lineCol, width: 2.6 } }];
+        // v27: the amber Heavy line is the EFFECTIVE Heavy limit for this
+        // crew (workload + acclimatisation + cumulative strain + debt),
+        // the same value renderSection2 / renderSection4 use. renderChart
+        // is only called from renderSection3, after state.totalStrain /
+        // state.debtDays are set, so this matches the banner and the
+        // shift plan. The red 28.0 C line stays the Moderate BASE limit.
+        const effLimit = L.effectiveWorkLimit(state.workload, state.acclimatization, state.totalStrain, state.debtDays)[0];
         // v14 FIX (live check 2026-11-16): the chart was clipped — top peaks
         // cut flat, the "31" y-axis label half-cut, x-axis date labels
         // half-cut, and the 26/28 °C limit labels running off the right
@@ -1080,7 +1422,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         // limit lines, limit labels moved INSIDE the plot (x=0.98 paper,
         // right-anchored, with a semi-transparent background), and
         // angled x-axis ticks so date labels do not get cut at the bottom.
-        const yDataMin = y.length ? Math.min.apply(null, y.concat([26.0])) : 20;
+        const yDataMin = y.length ? Math.min.apply(null, y.concat([effLimit])) : 20;
         const yDataMax = y.length ? Math.max.apply(null, y.concat([28.0])) : 28;
         const yMin = Math.floor(yDataMin - 2);
         const yMax = Math.ceil(yDataMax + 2);
@@ -1107,12 +1449,25 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                 automargin: true
             },
             shapes: [
-                { type: "line", x0: 0, x1: 1, xref: "paper", y0: 26.0, y1: 26.0, line: { color: "#f59e0b", dash: "dash" } },
+                { type: "line", x0: 0, x1: 1, xref: "paper", y0: effLimit, y1: effLimit, line: { color: "#f59e0b", dash: "dash" } },
                 { type: "line", x0: 0, x1: 1, xref: "paper", y0: 28.0, y1: 28.0, line: { color: "#f43f5e", dash: "dash" } },
+                // v23: vertical marker where the forecast starts (5th day of the 6-day window). Presentation only, no data change.
+                ...(function () {
+                    const days = Array.from(new Set(chartRows.map(function (rr) { return rr.time.slice(0, 10); }))).sort();
+                    if (days.length < 5) return [];
+                    const fs = days[4] + "T00:00";
+                    return [{ type: "line", x0: fs, x1: fs, y0: 0, y1: 1, yref: "paper", line: { color: "#f59e0b", dash: "dot", width: 2 } }];
+                })(),
             ],
             annotations: [
-                { x: 0.98, xref: "paper", y: 26.0, text: t("chartHeavy"), showarrow: false, xanchor: "right", yanchor: "middle", bgcolor: labelBg, bordercolor: "#f59e0b", borderwidth: 1, font: { color: "#f59e0b", size: 11 } },
+                { x: 0.98, xref: "paper", y: effLimit, text: tf("chartHeavy", { limit: effLimit.toFixed(1) }), showarrow: false, xanchor: "right", yanchor: "middle", bgcolor: labelBg, bordercolor: "#f59e0b", borderwidth: 1, font: { color: "#f59e0b", size: 11 } },
                 { x: 0.98, xref: "paper", y: 28.0, text: t("chartModerate"), showarrow: false, xanchor: "right", yanchor: "middle", bgcolor: labelBg, bordercolor: "#f43f5e", borderwidth: 1, font: { color: "#f43f5e", size: 11 } },
+                // v23: "Forecast" label on the forecast-start marker.
+                ...(function () {
+                    const days = Array.from(new Set(chartRows.map(function (rr) { return rr.time.slice(0, 10); }))).sort();
+                    if (days.length < 5) return [];
+                    return [{ x: days[4] + "T00:00", y: 1, yref: "paper", text: t("strainForecast"), showarrow: false, xanchor: "left", yanchor: "top", bgcolor: labelBg, bordercolor: "#f59e0b", borderwidth: 1, font: { color: "#f59e0b", size: 11 } }];
+                })(),
             ],
         };
         const config = { responsive: true, displayModeBar: false };
@@ -1123,12 +1478,50 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     // ------------------------------------------------------------------
     // Rendering — Section 4 (shift schedule)
     // ------------------------------------------------------------------
+    function shiftRowMeta(protocol) {
+        if (protocol.indexOf("SHADE BREAK") === 0) return { trCls: "tg-shift-shade", badgeCls: "tg-badge-blue" };
+        if (protocol === "NO OUTDOOR WORK") return { trCls: "tg-shift-stop", badgeCls: "tg-badge-red" };
+        if (protocol.indexOf("30 work") === 0) return { trCls: "tg-shift-half", badgeCls: "tg-badge-amber" };
+        if (protocol.indexOf("45 work") === 0) return { trCls: "", badgeCls: "tg-badge-amber" };
+        return { trCls: "", badgeCls: "tg-badge-green" };
+    }
+
+    // v28.1: takes the whole row — the explanation is built from
+    // its structured parts (Arabic templates) or the logic.js
+    // string (English), then the leading trigger tag is highlighted.
+    function formatShiftExplanation(row) {
+        const text = shiftExplanationText(row);
+        const safe = esc(text);
+        const triggers = isAr() ? [
+            { key: "إيقاف استباقي", cls: "tg-trig-red" },
+            { key: "إيقاع استباقي 30/30", cls: "tg-trig-amber" },
+            { key: "هامش ما قبل الحد", cls: "tg-trig-amber" },
+            { key: "استراحة الظل 13-15", cls: "tg-trig-blue" },
+            { key: "نافذة عمل متواصل آمنة", cls: "tg-trig-green" },
+        ] : [
+            { key: "PROACTIVE HALT", cls: "tg-trig-red" },
+            { key: "PROACTIVE 30/30 PACING", cls: "tg-trig-amber" },
+            { key: "PRE-THRESHOLD BUFFER", cls: "tg-trig-amber" },
+            { key: "SHADE BREAK 13-15", cls: "tg-trig-blue" },
+            { key: "Safe continuous window", cls: "tg-trig-green" },
+        ];
+        for (const tr of triggers) {
+            if (safe.indexOf(tr.key) === 0) {
+                return "<span class='tg-trigger-tag " + tr.cls + "'>" + tr.key + "</span>" + safe.slice(tr.key.length);
+            }
+        }
+        return safe;
+    }
+
     function renderSection4(hourly) {
-        const s = L.computeShiftSchedule(hourly, state.spike, state.clothing);
+        const s = L.computeShiftSchedule(hourly, state.spike, state.clothing, state.workload, state.acclimatization, state.totalStrain, state.debtDays, state.exposure);
         state.preventedHours = s.preventedHours;
         state.coolingMinutes = s.coolingMinutes;
         state.shiftTomorrow = s.tomorrow;
-        setMetric($("kpiPrevented"), t("kpiPreventedLabel"), s.preventedHours + (isAr() ? " ساعة / وردية 12 ساعة" : " hrs / 12-hr shift"), t("kpiPreventedDelta"));
+        state.effectiveLimit = s.effectiveLimit;
+        state.limitRationale = s.limitRationale;
+        state.limitRationaleParts = s.limitRationaleParts;
+        setMetric($("kpiPrevented"), t("kpiPreventedLabel"), s.preventedHours + (isAr() ? " ساعة / وردية 12 ساعة" : " hrs / 12-hr shift"), tf("kpiPreventedDelta", { limit: s.effectiveLimit.toFixed(1) }));
         setMetric($("kpiCooling"), t("kpiCoolingLabel"), s.coolingMinutes + (isAr() ? " دقيقة" : " mins"), tf("kpiCoolingDelta", { h: (s.coolingMinutes / 60).toFixed(1) }));
         setMetric($("kpiDebt"), t("kpiDebtLabel"), state.debtDays + (isAr() ? " / 6 أيام" : " / 6 days"), t("kpiDebtDelta"));
         $("shiftIntro").innerHTML = tf("shiftIntro", { tomorrow: esc(s.tomorrow), spike: state.spike });
@@ -1136,11 +1529,22 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         wrap.innerHTML = "";
         const table = el("table", "tg-table tg-keep-ltr");
         const thead = document.createElement("thead");
-        thead.innerHTML = "<tr><th>" + t("shiftThHour") + "</th><th>" + t("shiftThTemp") + "</th><th>" + t("shiftThWbgt") + "</th><th>" + t("shiftThRatio") + "</th><th>" + t("shiftThCrew") + "</th></tr>";
+        thead.innerHTML = "<tr><th>" + t("shiftThHour") + "</th><th>" + t("shiftThTemp") + "</th><th>" + t("shiftThWbgt") + "</th><th>" + t("shiftThRatio") + "</th><th>" + t("shiftThCrew") + "</th><th>" + t("shiftThHydration") + "</th><th>" + t("shiftThExplanation") + "</th></tr>";
         const tbody = document.createElement("tbody");
         for (const row of s.rows) {
+            const meta = shiftRowMeta(row.protocol);
             const tr = document.createElement("tr");
-            tr.innerHTML = "<td>" + esc(row.hour) + "</td><td>" + row.temp.toFixed(1) + "</td><td>" + row.wbgt.toFixed(1) + "</td><td>" + esc(isAr() ? (PROTOCOL_AR[row.protocol] || row.protocol) : row.protocol) + "</td><td>" + esc(isAr() ? (CREW_AR[row.crew] || row.crew) : row.crew) + "</td>";
+            if (meta.trCls) tr.className = meta.trCls;
+            const protoText = isAr() ? (PROTOCOL_AR[row.protocol] || row.protocol) : row.protocol;
+            const crewText = isAr() ? (CREW_AR[row.crew] || row.crew) : row.crew;
+            tr.innerHTML =
+                "<td><b>" + esc(row.hour) + "</b></td>" +
+                "<td>" + row.temp.toFixed(1) + "</td>" +
+                "<td><b>" + row.wbgt.toFixed(1) + "</b></td>" +
+                "<td><span class='tg-badge " + meta.badgeCls + "'>" + esc(protoText) + "</span></td>" +
+                "<td>" + esc(crewText) + "</td>" +
+                "<td>" + esc(translateHydration(row.hydration)) + "</td>" +
+                "<td>" + formatShiftExplanation(row) + "</td>";
             tbody.appendChild(tr);
         }
         table.appendChild(thead); table.appendChild(tbody);
@@ -1173,6 +1577,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             [t("triageSeverity"), r.symptomSeverity],
             [t("triageSymptoms"), r.symptoms.join(", ")],
             [t("triageHydration"), r.hydrationStatus],
+            [t("triageHydrationProtocol"), translateHydration(r.hydrationProtocol || "")],
+            [t("triageCorrelation"), r.explainableCorrelation || ""],
             [t("triageFriction"), r.equipmentFriction],
             [t("triageTier"), ta.tier],
             [t("triageAction"), ta.action],
@@ -1183,7 +1589,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         const tbody = document.createElement("tbody");
         for (const pair of rows) {
             const tr = document.createElement("tr");
-            const sev = pair[0] === "Symptom Severity" ? severityBadge(pair[1]) : esc(pair[1]);
+            const sev = pair[0] === t("triageSeverity") ? severityBadge(pair[1]) : esc(pair[1]);
             tr.innerHTML = "<td><b>" + esc(pair[0]) + "</b></td><td>" + sev + "</td>";
             tbody.appendChild(tr);
         }
@@ -1191,7 +1597,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         wrap.appendChild(table);
     }
     function severityBadge(sev) {
-        const cls = sev === "Critical" ? "tg-badge-red" : (sev === "High" ? "tg-badge-amber" : "tg-badge-green");
+        const cls = (sev === "Critical" || sev === "Severe") ? "tg-badge-red" : (sev === "High" ? "tg-badge-amber" : "tg-badge-green");
         return "<span class='tg-badge " + cls + "'>" + esc(isAr() ? (SEV_AR[sev] || sev) : sev) + "</span>";
     }
 
@@ -1226,12 +1632,21 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                     attribution: "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics",
                 });
                 window.L.control.layers({ "Street": state.compareMapTile, "Satellite": state.compareMapSat }).addTo(state.compareMap);
+                // v25 polish: dark-mode Street tiles get the dark filter;
+                // Satellite stays full colour.
+                state.compareMapBaseStreet = true;
+                container.classList.toggle("tg-map-dark-tiles", isDark);
+                state.compareMap.on("baselayerchange", function (ev) {
+                    state.compareMapBaseStreet = (ev.name === "Street");
+                    container.classList.toggle("tg-map-dark-tiles", state.theme === "dark" && state.compareMapBaseStreet);
+                });
                 state.compareMapMarkers = {};
                 state.compareMapRings = {};
                 window.addEventListener("resize", function () { if (state.compareMap) state.compareMap.invalidateSize(); });
                 setTimeout(function () { if (state.compareMap) state.compareMap.invalidateSize(); }, 300);
             } else {
                 state.compareMapTile.setUrl(leafletTileUrl(isDark));
+                container.classList.toggle("tg-map-dark-tiles", isDark && state.compareMapBaseStreet !== false);
             }
             // Live WBGT and risk tier per site, from the compare table rows (if loaded).
             const wbgtBySite = {};
@@ -1311,12 +1726,12 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         }
         const table = el("table", "tg-table tg-keep-ltr");
         const thead = document.createElement("thead");
-        thead.innerHTML = "<tr><th>" + t("compareThSite") + "</th><th>" + t("compareThCurrent") + "</th><th>" + t("compareThMax") + "</th><th>" + t("compareThDebt") + "</th><th>" + t("compareThTier") + "</th></tr>";
+        thead.innerHTML = "<tr><th>" + t("compareThSite") + "</th><th>" + t("compareThCurrent") + "</th><th>" + t("compareThSolar") + "</th><th>" + t("compareThMax") + "</th><th>" + t("compareThDebt") + "</th><th>" + t("compareThTier") + "</th></tr>";
         const tbody = document.createElement("tbody");
         for (const r of state.compareRows) {
             const badge = r.tier === "Critical" ? "tg-badge-red" : (r.tier === "High" ? "tg-badge-amber" : (r.tier === "Moderate" ? "tg-badge-blue" : "tg-badge-green"));
             const tr = document.createElement("tr");
-            tr.innerHTML = "<td>" + esc(compareName(r.site)) + "</td><td>" + r.currentWbgt.toFixed(1) + "</td><td>" + r.maxWbgt.toFixed(1) + "</td><td>" + esc(isAr() ? r.debtDays.replace(" / 6", " / 6 أيام") : r.debtDays) + "</td><td><span class='tg-badge " + badge + "'>" + esc(isAr() ? (TIER_AR[r.tier] || r.tier) : r.tier) + "</span></td>";
+            tr.innerHTML = "<td>" + esc(compareName(r.site)) + "</td><td>" + r.currentWbgt.toFixed(1) + "</td><td>" + (r.solar !== undefined && r.solar !== null ? r.solar : "—") + "</td><td>" + r.maxWbgt.toFixed(1) + "</td><td>" + esc(isAr() ? r.debtDays.replace(" / 6", " / 6 أيام") : r.debtDays) + "</td><td><span class='tg-badge " + badge + "'>" + esc(isAr() ? (TIER_AR[r.tier] || r.tier) : r.tier) + "</span></td>";
             tbody.appendChild(tr);
         }
         table.appendChild(thead); table.appendChild(tbody);
@@ -1356,7 +1771,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         const a = state.activeLive;
         if (!a) return;
         const c = a.current;
-        const wbgt = L.estimateWBGT(c.temperature_2m + state.demoSpike, c.relative_humidity_2m, a.solar, c.wind_speed_10m, state.clothing)[0];
+        const wbgt = L.estimateWBGT(c.temperature_2m + state.demoSpike, c.relative_humidity_2m, a.solar, c.wind_speed_10m, state.clothing, state.exposure)[0];
         $("demoValue").textContent = "+" + state.demoSpike + " °C";
         const status = wbgt > 28.0 ? t("phoneHot") : (wbgt > 26.0 ? t("phoneHigh") : t("phoneOk"));
         const colour = wbgt > 28.0 ? "#f43f5e" : (wbgt > 26.0 ? "#f59e0b" : "#10b981");
@@ -1392,6 +1807,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             "2. ACTIVE WORKSITE: " + state.activeName + " (" + coords.lat.toFixed(4) + ", " + coords.lon.toFixed(4) + ")",
             "   HEAT SPIKE: +" + state.spike + " C anomaly -> Spiked WBGT " + state.spikedWbgt.toFixed(1) + " C",
             "   CLOTHING / PPE: " + state.clothing + " (+" + (L.CLOTHING_CORRECTION[state.clothing] || 0).toFixed(0) + " C, ISO 7243 Annex C)",
+            "   WORKLOAD: " + state.workload + " | ACCLIMATISATION: " + state.acclimatization + " | EXPOSURE: " + state.exposure,
+            "   EFFECTIVE LIMIT: " + (state.effectiveLimit !== undefined ? state.effectiveLimit.toFixed(1) : L.effectiveWorkLimit(state.workload, state.acclimatization, state.totalStrain, state.debtDays)[0].toFixed(1)) + " C (" + (state.limitRationale || L.effectiveWorkLimit(state.workload, state.acclimatization, state.totalStrain, state.debtDays)[2]) + ")",
             "   NIOSH Acclimatised Continuous Work Thresholds:",
             ...L.nioshCheck(state.spikedWbgt),
             "",
@@ -1407,6 +1824,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                 "  - Worker Summary: " + tr.workerSummary,
                 "  - Severity / Risk Tier: " + tr.symptomSeverity + " | " + tr.oshaRiskTier,
                 "  - Immediate Action: " + tr.immediateAction,
+                "  - Hydration Protocol: " + (tr.hydrationProtocol || ""),
+                "  - Explainable Correlation: " + (tr.explainableCorrelation || ""),
                 "  - Arabic Broadcast: " + tr.arabicCrewAlert,
                 "  - Hindi/Urdu Broadcast: " + tr.hindiUrduCrewAlert,
             );
@@ -1451,6 +1870,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             "2. موقع العمل النشط: " + shortAr(state.activeName) + " (" + coords.lat.toFixed(4) + ", " + coords.lon.toFixed(4) + ")",
             "   موجة الحر: +" + state.spike + " °C شذوذ -> WBGT بعد الموجة " + state.spikedWbgt.toFixed(1) + " °C",
             "   الملابس / معدات الوقاية: " + (CLOTHING_AR[state.clothing] || state.clothing) + " (+" + (L.CLOTHING_CORRECTION[state.clothing] || 0).toFixed(0) + " °C, ISO 7243 الملحق ج)",
+            "   شدة العمل: " + (WORK_AR[state.workload] || state.workload) + " | التأقلم: " + state.acclimatization + " | التعرض: " + state.exposure,
+            "   الحد الفعال: " + (state.effectiveLimit !== undefined ? state.effectiveLimit.toFixed(1) : L.effectiveWorkLimit(state.workload, state.acclimatization, state.totalStrain, state.debtDays)[0].toFixed(1)) + " °C",
             "   حدود NIOSH للعمال المتأقلمين في العمل المتواصل:",
             ...nioshLines,
             "",
@@ -1467,6 +1888,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                 "  - ملخص العامل: " + translateSummary(tr.workerSummary),
                 "  - الشدة / مستوى الخطر: " + (SEV_AR[tr.symptomSeverity] || tr.symptomSeverity) + " | " + ta.tier,
                 "  - الإجراء الفوري: " + ta.action,
+                "  - بروتوكول الترطيب: " + (tr.hydrationProtocol || ""),
+                "  - الارتباط القابل للتفسير: " + (tr.explainableCorrelation || ""),
                 "  - بث الطاقم بالعربية: " + tr.arabicCrewAlert,
                 "  - بث الطاقم بالهندية/الأردية: " + tr.hindiUrduCrewAlert,
             );
@@ -1489,7 +1912,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         for (const name of Object.keys(L.ZONES)) {
             const z = state.live[name];
             if (!z || !z.current) continue;
-            const wbgt = L.estimateWBGT(z.current.temperature_2m, z.current.relative_humidity_2m, z.solar, z.current.wind_speed_10m, state.clothing);
+            const wbgt = L.estimateWBGT(z.current.temperature_2m, z.current.relative_humidity_2m, z.solar, z.current.wind_speed_10m, state.clothing, state.exposure);
             z.wbgt = wbgt[0]; z.wetBulb = wbgt[1]; z.globe = wbgt[2];
         }
         renderZoneCards();
@@ -1507,7 +1930,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             const key = "tg_live_" + name;
             try {
                 const raw = await fetchLiveRaw(lat, lon);
-                const wbgt = L.estimateWBGT(raw.current.temperature_2m, raw.current.relative_humidity_2m, raw.solar, raw.current.wind_speed_10m, state.clothing);
+                const wbgt = L.estimateWBGT(raw.current.temperature_2m, raw.current.relative_humidity_2m, raw.solar, raw.current.wind_speed_10m, state.clothing, state.exposure);
                 live[name] = { current: raw.current, solar: raw.solar, wbgt: wbgt[0], wetBulb: wbgt[1], globe: wbgt[2] };
                 cacheSet(key, live[name]);
             } catch (e) {
@@ -1525,6 +1948,11 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
 
     async function loadActive() {
         const coords = activeCoords();
+        // v25 fix 4: remember whether the site just changed, so
+        // renderSection2 can set the new WBGT instantly instead of
+        // animating up from the old site's value (which briefly showed
+        // e.g. Lagos 26.1 C on the way to the true 34.3 C).
+        state.siteJustChanged = !!state.activeName && state.activeName !== coords.name;
         state.activeName = coords.name;
         const liveKey = "tg_active_live_" + coords.lat.toFixed(4) + "_" + coords.lon.toFixed(4);
         const hourlyKey = "tg_active_hourly_" + coords.lat.toFixed(4) + "_" + coords.lon.toFixed(4);
@@ -1553,6 +1981,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     async function loadCompare() {
         const siteHourly = {};
         const siteCurrent = {};
+        const siteSolar = {};
         try {
             for (const siteName of Object.keys(L.COMPARE_SITES)) {
                 const lat = L.COMPARE_SITES[siteName][0], lon = L.COMPARE_SITES[siteName][1];
@@ -1566,10 +1995,12 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                 }
                 if (state.live && state.live[siteName]) {
                     siteCurrent[siteName] = state.live[siteName].wbgt;
+                    siteSolar[siteName] = state.live[siteName].solar;
                 } else {
                     try {
                         const raw = await fetchLiveRaw(lat, lon);
-                        siteCurrent[siteName] = L.estimateWBGT(raw.current.temperature_2m, raw.current.relative_humidity_2m, raw.solar, raw.current.wind_speed_10m, state.clothing)[0];
+                        siteCurrent[siteName] = L.estimateWBGT(raw.current.temperature_2m, raw.current.relative_humidity_2m, raw.solar, raw.current.wind_speed_10m, state.clothing, state.exposure)[0];
+                        siteSolar[siteName] = raw.solar;
                         cacheSet(lk, siteCurrent[siteName]);
                     } catch (e) {
                         const cached = cacheGet(lk);
@@ -1578,7 +2009,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
                     }
                 }
             }
-            state.compareRows = L.computeCompareSites(siteHourly, state.spike, siteCurrent, state.clothing);
+            state.compareRows = L.computeCompareSites(siteHourly, state.spike, siteCurrent, state.clothing, state.exposure, siteSolar);
         } catch (e) {
             state.compareRows = null;
         }
@@ -1667,7 +2098,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             syncCustomGpsInputs();
             if (state.live) { renderZoneCards(); renderMap(); }
             if (state.activeLive) renderSection2();
-            if (state.activeHourly) renderSection3();
+            if (state.activeHourly) { renderSection3(); renderSection4(state.activeHourly); }
             renderCompare();
             if (state.triage) renderTriageResult();
             renderCost();
@@ -1676,6 +2107,11 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             // (top-level globals); re-translate them in place, never hide.
             var ib = document.getElementById("installBtn");
             if (ib && typeof window.pwaT === "function") ib.textContent = ib.disabled ? window.pwaT("installed") : window.pwaT("install");
+            // v22: keep the auto-poll toggle label and the telemetry
+            // heartbeat in the new language.
+            var ap = document.getElementById("btnAutoPoll");
+            if (ap) ap.textContent = t(state.autoPoll ? "autoPollOn" : "autoPollOff");
+            updateHeartbeat();
             var pkey = document.body.getAttribute("data-pwa-key");
             if (pkey && typeof window.pwaT === "function" && typeof window.setPwaStatus === "function") window.setPwaStatus(window.pwaT(pkey), pkey);
         } catch (e) { reportError("language re-render failed: " + e.message); }
@@ -1687,7 +2123,12 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
     // ------------------------------------------------------------------
     function initControls() {
         // Site select (display name follows the language; value stays English)
+        // v28.2 FIX: clear before appending. applyLang() already rebuilt this
+        // select during boot (rebuildSelect), so appending here without
+        // clearing doubled every option (Mussafah, KEZAD, Ruwais, Lagos,
+        // Delhi, Houston, Custom all appeared twice).
         const sel = $("siteSelect");
+        sel.innerHTML = "";
         for (const label of Object.keys(L.GLOBAL_SITES)) {
             const opt = document.createElement("option");
             opt.value = label; opt.textContent = siteName(label);
@@ -1754,6 +2195,61 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
             renderPhone();
             loadCompare();
         });
+        // v22: coupled crew context — workload, acclimatisation and sun
+        // exposure change the effective limit, so the strain timeline,
+        // shift plan and triage all re-render in place (no refetch).
+        function rerenderCoupled() {
+            applyClothingToLive();
+            renderSection2();
+            renderSection3();
+            renderPhone();
+            // v25 fix 3: a workload / acclimatisation / exposure change
+            // must NOT recompute the triage result — that silently
+            // replaced a live Groq result with the deterministic
+            // fallback (severity Mild -> High) without a Run. The
+            // existing result stays on screen until the user clicks
+            // Run triage or the hero showcase runs it again.
+        }
+        $("workloadSelect").addEventListener("change", function () {
+            state.workload = $("workloadSelect").value || "Heavy";
+            rerenderCoupled();
+        });
+        $("acclimSelect").addEventListener("change", function () {
+            state.acclimatization = $("acclimSelect").value || "acclimatised";
+            rerenderCoupled();
+        });
+        $("exposureSelect").addEventListener("change", function () {
+            state.exposure = $("exposureSelect").value || "open_sun";
+            rerenderCoupled();
+        });
+        // v22: Live GPS — use the device position as a Custom worksite.
+        // On failure show a status message and keep the current worksite;
+        // never crash, never clear the data already on screen.
+        $("btnLiveGps").addEventListener("click", function () {
+            if (!navigator.geolocation) {
+                showStatus(t("gpsUnsupported"));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                state.customLat = pos.coords.latitude;
+                state.customLon = pos.coords.longitude;
+                state.siteLabel = "Custom Global GPS Coordinates (Any Worksite Worldwide)";
+                $("siteSelect").value = state.siteLabel;
+                syncCustomGpsInputs();
+                showStatus(tf("gpsOk", { lat: state.customLat.toFixed(4), lon: state.customLon.toFixed(4) }));
+                loadActive();
+            }, function (err) {
+                showStatus(tf("gpsFailed", { msg: (err && err.message) ? err.message : "permission denied" }));
+            });
+        });
+        // v22: Live Auto-Poll — reload live telemetry every 60 s while ON.
+        // The toggle flips state.autoPoll and the button label; the
+        // interval itself is started once in boot().
+        $("btnAutoPoll").addEventListener("click", function () {
+            state.autoPoll = !state.autoPoll;
+            $("btnAutoPoll").textContent = t(state.autoPoll ? "autoPollOn" : "autoPollOff");
+            if (state.autoPoll) loadAll();
+        });
         // Demo slider (phone only)
         $("demoSlider").addEventListener("input", function () {
             state.demoSpike = parseInt($("demoSlider").value, 10);
@@ -1761,7 +2257,12 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         });
         // Triage (preset names translated; the note text itself is
         // left exactly as written, worker names and all)
+        // Same fix as the site select above: clear before appending.
+        // applyLang() already rebuilt this select during boot
+        // (rebuildSelect), so appending here without clearing doubled
+        // every case (all 4 scenario presets appeared twice).
         const caseSel = $("caseSelect");
+        caseSel.innerHTML = "";
         for (const name of Object.keys(L.SCENARIO_PRESETS)) {
             const opt = document.createElement("option");
             opt.value = name; opt.textContent = isAr() ? (CASE_AR[name] || name) : name;
@@ -1771,11 +2272,44 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         caseSel.addEventListener("change", function () {
             $("noteInput").value = L.SCENARIO_PRESETS[caseSel.value];
         });
-        $("btnTriage").addEventListener("click", function () {
-            const note = $("noteInput").value;
-            const result = L.deterministicTriageFallback(note, state.spikedWbgt);
-            state.triage = { result: result, engine: "Deterministic Clinical Fallback Engine (Offline / No-Key Mode)" };
-            renderTriageResult();
+        var TRIAGE_WORKER_URL = "https://thermigraph-triage.alexowoade.workers.dev";
+        $("btnTriage").addEventListener("click", async function () {
+            const btn = $("btnTriage");
+            const prevLabel = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = t("triageLoading");
+            try {
+                const note = $("noteInput").value;
+                if (TRIAGE_WORKER_URL) {
+                    // v25 polish: skeleton shimmer while the Worker answers.
+                    // renderTriageResult() clears the wrap on both the live
+                    // and the fallback path, so it never stays on screen.
+                    $("triageTableWrap").innerHTML = "<div class='tg-glass-card'><div class='tg-skeleton' style='width:60%'></div><div class='tg-skeleton' style='width:95%'></div><div class='tg-skeleton' style='width:80%'></div></div>";
+                    try {
+                        const ctrl = new AbortController();
+                        const timer = setTimeout(function () { ctrl.abort(); }, 25000);
+                        const resp = await fetch(TRIAGE_WORKER_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ note: note, wbgt_c: state.spikedWbgt, spike_c: state.spike || 0, cumulative_strain: state.totalStrain, debt_days: state.debtDays, acclimatization: state.acclimatization, workload: state.workload, clothing: state.clothing }),
+                            signal: ctrl.signal,
+                        });
+                        clearTimeout(timer);
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            state.triage = { result: data.result, engine: data.engine };
+                            renderTriageResult();
+                            return;
+                        }
+                    } catch (e) { /* fall through to the deterministic fallback */ }
+                }
+                const result = L.deterministicTriageFallback(note, state.spikedWbgt, state.totalStrain, state.debtDays, state.acclimatization, state.workload, state.clothing, state.exposure);
+                state.triage = { result: result, engine: "Deterministic Clinical Fallback Engine (Offline / No-Key Mode)" };
+                renderTriageResult();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = prevLabel;
+            }
         });
         // Report download
         $("btnReport").addEventListener("click", function () {
@@ -1907,7 +2441,8 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         $("dayValue").textContent = isAr() ? ("اليوم " + day) : ("Day " + day);
         const d = state.dailyRows[day - 1];
         if (!d) return;
-        $("dayReadout").textContent = tf("dayReadout", { day: day, date: d.date, wbgt: d.maxWbgt.toFixed(1), night: d.nightMin.toFixed(1), points: d.points, cum: d.cumulative }) + (d.cumulative >= 12 ? t("dayReadoutRed") : "");
+        const daySrc = (day - 1) >= state.dailyRows.length - 2 ? t("strainForecast") : t("strainObserved");
+        $("dayReadout").textContent = tf("dayReadout", { day: day, date: d.date, wbgt: d.maxWbgt.toFixed(1), night: d.nightMin.toFixed(1), points: d.points, cum: d.cumulative }) + " · " + daySrc + (d.cumulative >= 12 ? t("dayReadoutRed") : "");
         // Highlight the matching table row.
         const rows = document.querySelectorAll("#strainTableWrap tbody tr");
         rows.forEach(function (tr, idx) { tr.classList.toggle("tg-row-active", idx === day - 1); });
@@ -1926,7 +2461,7 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         const prevented = (state.preventedHours || 0) * pct / 100;
         const cooling = (state.coolingMinutes || 0) * pct / 100;
         setMetric($("kpiPrevented"), t("kpiPreventedLabel"),
-            prevented.toFixed(1) + (isAr() ? " ساعة / وردية 12 ساعة" : " hrs / 12-hr shift"), tf("baPreventedDelta", { pct: pct }));
+            prevented.toFixed(1) + (isAr() ? " ساعة / وردية 12 ساعة" : " hrs / 12-hr shift"), tf("baPreventedDelta", { pct: pct, limit: (state.effectiveLimit !== undefined ? state.effectiveLimit : 26.0).toFixed(1) }));
         setMetric($("kpiCooling"), t("kpiCoolingLabel"),
             Math.round(cooling) + (isAr() ? " دقيقة" : " mins"), tf("baCoolingDelta", { h: (cooling / 60).toFixed(1), pct: pct }));
     }
@@ -2030,6 +2565,16 @@ function pwaT(k) { var lang = (document.documentElement.lang === "ar") ? "ar" : 
         try { renderCost(); } catch (e) { reportError("cost calculator failed: " + e.message); }
         try { initCounters(); } catch (e) { reportError("counters failed: " + e.message); }
         try { initScrollReveal(); } catch (e) { reportError("scroll reveal failed: " + e.message); }
+        // v22: 60 s live auto-poll (ON by default). One interval for the
+        // life of the page; the toggle only flips state.autoPoll, it
+        // never creates a second interval.
+        try {
+            if (!state.autoPollTimer) {
+                state.autoPollTimer = setInterval(function () {
+                    if (state.autoPoll) loadAll();
+                }, 60000);
+            }
+        } catch (e) { reportError("auto-poll failed: " + e.message); }
         loadAll();
     }
 
